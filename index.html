@@ -38,13 +38,31 @@ main{max-width:520px;margin:0 auto;padding:18px 16px 95px}.hero{height:180px;bor
 </main>
 <nav class="bottom"><button id="n-summary" class="nav active" onclick="view='summary';render()"><span>▦</span>Resumen</button><button id="n-days" class="nav" onclick="view='days';render()"><span>🗓</span>Días</button><button id="n-pending" class="nav" onclick="view='pending';render()"><span>☑</span>Pendientes</button><button id="n-links" class="nav" onclick="view='links';render()"><span>🔗</span>Enlaces</button></nav>
 <div class="modal" id="tripModal"><div class="box"><div class="boxhead"><h2>Nuevo viaje</h2><button class="round" onclick="closeTrip()">×</button></div><input id="tripName" placeholder="Nombre: Bruselas 2026"><input id="tripDates" placeholder="Fechas: 4 - 8 septiembre 2026"><input id="tripDest" placeholder="Destino"><input id="tripPeople" placeholder="Personas"><input id="tripHotel" placeholder="Alojamiento"><textarea id="tripSummary" placeholder="Resumen"></textarea><button class="primary" onclick="saveTrip()">Guardar viaje</button></div></div>
-<div class="modal" id="dayModal"><div class="box"><div class="boxhead"><h2>Añadir día desde Nota</h2><button class="round" onclick="closeDay()">×</button></div><input id="dayTitle" placeholder="Viernes 4 septiembre 2026"><textarea id="dayText" placeholder="Pega aquí la nota completa"></textarea><button class="primary" onclick="saveDay()">Organizar y guardar día</button><p class="muted">Versión 3: mapas mejorados. Si detecta Dirección o Ubicación, añade ciudad/destino del viaje para evitar búsquedas raras.</p></div></div>
+<div class="modal" id="dayModal"><div class="box"><div class="boxhead"><h2>Añadir día desde Nota</h2><button class="round" onclick="closeDay()">×</button></div><input id="dayTitle" placeholder="Viernes 4 septiembre 2026"><textarea id="dayText" placeholder="Pega aquí la nota completa"></textarea><button class="primary" onclick="saveDay()">Organizar y guardar día</button><p class="muted">Versión 4: corrige emojis/caracteres de Notas y mejora los enlaces de Google Maps.</p></div></div>
 <script>
 const KEY="mis_viajes_v3";let view="summary";let active=null;let trips=load();
 function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
-function clean(s){return String(s||"").replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,"")}
+function clean(s){
+  s = String(s || "");
+  let out = "";
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c >= 0xD800 && c <= 0xDBFF) {
+      const n = s.charCodeAt(i + 1);
+      if (n >= 0xDC00 && n <= 0xDFFF) { i++; continue; }
+      continue;
+    }
+    if (c >= 0xDC00 && c <= 0xDFFF) continue;
+    out += s[i];
+  }
+  return out;
+}
 function cityFromTrip(){let t=trip();let base=(t?.dest||t?.name||"").toLowerCase();if(base.includes("bruselas")||base.includes("brussels")||base.includes("bruxelles"))return "Brussels Belgium";if(base.includes("conil"))return "Conil de la Frontera Spain";if(base.includes("sevilla"))return "Sevilla Spain";if(base.includes("londres")||base.includes("london"))return "London UK";if(base.includes("roma")||base.includes("rome"))return "Rome Italy";return t?.dest||""}
-function mapUrl(q){q=clean(q).replace(/[📍🎟🔗🗺️➡️➔]/g," ").replace(/\s+/g," ").trim();let city=cityFromTrip();if(city && !q.toLowerCase().includes(city.toLowerCase().split(" ")[0])) q=q+" "+city;return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
+function mapUrl(q){q=clean(q).replace(/[📍🎟🔗🗺️➡️➔]/g," ").replace(/\s+/g," ").trim();let city=cityFromTrip();if(city && !q.toLowerCase().includes(city.toLowerCase().split(" ")[0])) q=q+" "+city;try {
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(clean(q));
+} catch(e) {
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("Brussels Belgium");
+}}
 function starter(){return[{id:id(),name:"Bruselas 2026",dates:"4 - 8 septiembre 2026",dest:"Bruselas, Gante y Brujas",people:"Familia de 4",hotel:"",summary:"Viaje familiar con base en Bruselas.",favorite:false,pending:[],links:[],notes:"",days:[]}]}
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||starter()}catch(e){return starter()}}
 function save(){localStorage.setItem(KEY,JSON.stringify(trips))}
