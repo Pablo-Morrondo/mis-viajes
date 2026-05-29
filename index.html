@@ -1,573 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#2563eb" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Mis Viajes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <title>Mis Viajes</title>
-
-  <style>
-    :root {
-      --bg: #f5f6fa;
-      --card: #ffffff;
-      --text: #15161a;
-      --muted: #737782;
-      --line: #e8e9ef;
-      --accent: #2563eb;
-      --accent-soft: rgba(37, 99, 235, 0.12);
-      --danger: #ef4444;
-      --shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
-      --radius: 22px;
-    }
-
-    body.dark {
-      --bg: #090b10;
-      --card: #171a21;
-      --text: #f4f6fb;
-      --muted: #a3a8b6;
-      --line: #2a2f3a;
-      --accent: #7aa2ff;
-      --accent-soft: rgba(122, 162, 255, 0.16);
-      --shadow: 0 16px 35px rgba(0, 0, 0, 0.35);
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    button, input, textarea { font-family: inherit; }
-    button { border: 0; cursor: pointer; border-radius: 16px; font-weight: 700; }
-    a { color: var(--accent); text-decoration: none; font-weight: 700; }
-
-    .topbar {
-      position: sticky; top: 0; z-index: 20;
-      padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
-      display: flex; align-items: center; gap: 10px;
-      background: color-mix(in srgb, var(--bg) 86%, transparent);
-      backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .icon-btn {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: var(--card); color: var(--text);
-      border: 1px solid var(--line);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
-      font-size: 18px;
-    }
-
-    .top-title {
-      flex: 1; text-align: center; font-weight: 800; font-size: 17px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-
-    .app { max-width: 520px; margin: 0 auto; padding: 14px 16px 90px; }
-
-    .hero {
-      min-height: 168px; border-radius: 26px; overflow: hidden; position: relative;
-      box-shadow: var(--shadow); margin-bottom: 14px;
-      background: linear-gradient(135deg, rgba(21,22,26,.15), rgba(21,22,26,.80)), url("icons/travel-bg.svg");
-      background-size: cover; background-position: center;
-    }
-
-    .hero-content { position: absolute; inset: auto 0 0 0; padding: 18px; color: white; }
-    .hero h1 { margin: 0; font-size: 31px; letter-spacing: -0.8px; }
-    .hero p { margin: 6px 0 0; opacity: .92; font-weight: 600; }
-
-    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 14px; }
-    .tab {
-      background: var(--card); border: 1px solid var(--line); padding: 12px 6px;
-      color: var(--text); box-shadow: 0 8px 20px rgba(0,0,0,.04); min-height: 70px;
-    }
-    .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-    .tab span { display: block; font-size: 22px; margin-bottom: 4px; }
-    .tab small { font-size: 12px; font-weight: 800; }
-
-    .card {
-      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 17px; box-shadow: var(--shadow); margin-bottom: 14px;
-    }
-    .card h2, .card h3 { margin: 0 0 12px; letter-spacing: -0.3px; }
-    .muted { color: var(--muted); font-size: 14px; }
-
-    .info-row {
-      display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start;
-      padding: 10px 0; border-bottom: 1px solid var(--line);
-    }
-    .info-row:last-child { border-bottom: 0; }
-
-    .primary { background: var(--accent); color: white; width: 100%; padding: 14px 16px; font-size: 16px; margin-top: 6px; }
-    .secondary { background: var(--accent-soft); color: var(--accent); padding: 11px 13px; }
-    .danger { background: rgba(239,68,68,.12); color: var(--danger); padding: 11px 13px; }
-
-    input, textarea {
-      width: 100%; border: 1px solid var(--line); background: var(--bg); color: var(--text);
-      padding: 13px 14px; border-radius: 16px; font-size: 15px; margin-bottom: 10px; outline: none;
-    }
-    textarea { min-height: 190px; resize: vertical; line-height: 1.45; }
-    .search { background: var(--card); margin-bottom: 12px; }
-
-    .day-card { border-left: 5px solid var(--accent); }
-    .day-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
-    .day-head h3 { margin: 0; font-size: 21px; }
-
-    .timeline { display: grid; gap: 8px; margin: 12px 0; }
-    .time-item {
-      display: grid; grid-template-columns: 68px 1fr; gap: 8px; align-items: start;
-      padding: 9px; background: var(--bg); border: 1px solid var(--line); border-radius: 15px;
-    }
-    .time { color: var(--accent); font-weight: 900; text-decoration: underline; }
-
-    .section-block { margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--line); }
-    .section-block h4 { margin: 0 0 8px; font-size: 16px; }
-    .raw-note { white-space: pre-wrap; line-height: 1.48; color: var(--text); }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-
-    .bottom-nav {
-      position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 18;
-      width: min(520px, 100%); padding: 8px 12px calc(env(safe-area-inset-bottom) + 8px);
-      background: color-mix(in srgb, var(--card) 90%, transparent);
-      backdrop-filter: blur(18px); border-top: 1px solid var(--line);
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-    }
-    .nav-btn { background: transparent; color: var(--muted); padding: 8px 2px; font-size: 12px; border-radius: 14px; }
-    .nav-btn.active { color: var(--accent); background: var(--accent-soft); }
-    .nav-btn span { display: block; font-size: 20px; margin-bottom: 2px; }
-
-    .sidebar {
-      position: fixed; z-index: 40; top: 0; left: -330px; width: 320px; max-width: 84vw; height: 100vh;
-      padding: calc(env(safe-area-inset-top) + 18px) 15px 30px;
-      background: #10141c; color: white; box-shadow: 20px 0 50px rgba(0,0,0,.38);
-      transition: .24s ease; overflow-y: auto;
-    }
-    .sidebar.open { left: 0; }
-    .overlay { position: fixed; inset: 0; z-index: 35; display: none; background: rgba(0,0,0,.45); }
-    .overlay.show { display: block; }
-    .side-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-
-    .trip-item {
-      display: grid; grid-template-columns: 58px 1fr; gap: 12px; padding: 10px; border-radius: 17px;
-      margin-bottom: 9px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); cursor: pointer;
-    }
-    .trip-item.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-    .thumb { width: 58px; height: 58px; border-radius: 13px; background: linear-gradient(135deg, #60a5fa, #1d4ed8); display:grid; place-items:center; font-size:26px; }
-    .trip-item strong { display: block; margin-top: 2px; }
-    .trip-item small { display: block; color: rgba(255,255,255,.76); margin-top: 3px; }
-
-    .empty { text-align: center; padding: 28px 16px; color: var(--muted); }
-    .link-card { padding: 12px; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); margin-bottom: 8px; word-break: break-word; }
-
-    .checkbox-line { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
-    .checkbox-line:last-child { border-bottom: 0; }
-    .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); margin-top: 2px; flex: 0 0 auto; }
-
-    .modal {
-      position: fixed; z-index: 50; inset: 0; display: none; padding: 18px;
-      background: rgba(0,0,0,.55); overflow-y: auto;
-    }
-    .modal.show { display: block; }
-    .modal-card {
-      max-width: 520px; margin: calc(env(safe-area-inset-top) + 20px) auto 30px;
-      background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 18px; box-shadow: var(--shadow);
-    }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mis Viajes">
+<link rel="manifest" href="manifest.json">
+<title>Mis Viajes</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--soft:#dbeafe;--danger:#ef4444}
+body.dark{--bg:#0b0f18;--card:#171b24;--text:#f9fafb;--muted:#a1a1aa;--line:#2b3140;--soft:#1e3a8a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea{font:inherit}button{border:0;border-radius:16px;font-weight:800}a{color:var(--blue);font-weight:800;text-decoration:none}
+.top{position:sticky;top:0;z-index:10;background:rgba(245,246,250,.88);backdrop-filter:blur(16px);display:flex;gap:10px;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+body.dark .top{background:rgba(11,15,24,.88)}.title{flex:1;text-align:center;font-size:20px;font-weight:900}.round{width:46px;height:46px;border-radius:50%;background:var(--card);color:var(--text);border:1px solid var(--line);font-size:20px}
+main{max-width:520px;margin:0 auto;padding:18px 16px 95px}.hero{height:180px;border-radius:28px;background:linear-gradient(135deg,#60a5fa,#111827);color:white;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:16px;box-shadow:0 14px 34px #0002}.hero h1{font-size:36px;margin:0}.hero p{margin:6px 0 0;font-weight:700;opacity:.92}
+.tabs,.bottom{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.tab,.nav{background:var(--card);color:var(--text);border:1px solid var(--line);padding:12px 6px;min-height:68px}.tab.active,.nav.active,.primary{background:var(--blue);color:white}.tab span,.nav span{display:block;font-size:22px}.tab small{font-weight:900}
+.search,input,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--card);color:var(--text);margin:12px 0;font-size:16px}textarea{min-height:230px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin:14px 0;box-shadow:0 12px 28px #0001}.card h2,.card h3{margin:0 0 12px}.muted{color:var(--muted)}.primary{width:100%;padding:15px;margin:8px 0;font-size:17px}.secondary{background:var(--soft);color:var(--blue);padding:11px 13px}.danger{background:#fee2e2;color:var(--danger);padding:11px 13px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.row{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
+.day{border-left:5px solid var(--blue)}.head{display:flex;justify-content:space-between;gap:10px}.timeitem{display:grid;grid-template-columns:70px 1fr;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:10px;margin:8px 0}.time{color:var(--blue);font-weight:900;text-decoration:underline}.block{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.raw{white-space:pre-wrap;line-height:1.45}
+.side{position:fixed;z-index:30;inset:0 auto 0 -330px;width:320px;max-width:86vw;background:#111827;color:white;padding:calc(env(safe-area-inset-top) + 18px) 15px 30px;transition:.25s;box-shadow:18px 0 40px #0007}.side.open{left:0}.shade{position:fixed;inset:0;background:#0007;display:none;z-index:20}.shade.show{display:block}.sidehead{display:flex;justify-content:space-between;align-items:center}.trip{display:grid;grid-template-columns:54px 1fr;gap:12px;padding:10px;border-radius:18px;background:#ffffff12;margin:9px 0}.trip.active{background:#2563eb}.thumb{width:54px;height:54px;border-radius:14px;background:#2563eb;display:grid;place-items:center;font-size:25px}.trip small{display:block;color:#ffffffcc}
+.modal{position:fixed;z-index:40;inset:0;background:#0008;display:none;padding:16px;overflow:auto}.modal.show{display:block}.box{max-width:520px;margin:40px auto;background:var(--card);border-radius:28px;padding:20px}.boxhead{display:flex;justify-content:space-between;align-items:center}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:rgba(255,255,255,.9);backdrop-filter:blur(16px);padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);border-top:1px solid var(--line)}body.dark .bottom{background:rgba(23,27,36,.9)}.nav{background:transparent;color:var(--muted);min-height:58px;font-size:12px}.empty{text-align:center;color:var(--muted);padding:30px}.linkcard{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0;word-break:break-word}
+</style>
 </head>
-
 <body>
-  <div class="topbar">
-    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
-    <div class="top-title" id="topTitle">Mis Viajes</div>
-    <button class="icon-btn" onclick="toggleFavoriteActive()">★</button>
-    <button class="icon-btn" onclick="toggleDark()">☾</button>
-  </div>
-
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-  <aside class="sidebar" id="sidebar">
-    <div class="side-head">
-      <h2>🧳 Mis viajes</h2>
-      <button class="icon-btn" onclick="toggleSidebar()">×</button>
-    </div>
-    <div id="tripList"></div>
-    <button class="primary" onclick="openTripModal()">＋ Añadir viaje</button>
-  </aside>
-
-  <main class="app">
-    <section class="hero">
-      <div class="hero-content">
-        <h1 id="heroName">Mis Viajes</h1>
-        <p id="heroMeta"></p>
-        <p id="heroDest"></p>
-      </div>
-    </section>
-
-    <div class="tabs">
-      <button class="tab active" id="tab-summary" onclick="setView('summary')"><span>▦</span><small>Resumen</small></button>
-      <button class="tab" id="tab-days" onclick="setView('days')"><span>🗓</span><small>Itinerario</small></button>
-      <button class="tab" id="tab-pending" onclick="setView('pending')"><span>☑</span><small>Pendientes</small></button>
-      <button class="tab" id="tab-links" onclick="setView('links')"><span>🔗</span><small>Enlaces</small></button>
-    </div>
-
-    <input class="search" id="search" placeholder="Buscar día, restaurante, mapa, palabra..." oninput="render()" />
-    <section id="content"></section>
-  </main>
-
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-summary" onclick="setView('summary')"><span>▦</span>Resumen</button>
-    <button class="nav-btn" id="nav-days" onclick="setView('days')"><span>🗓</span>Días</button>
-    <button class="nav-btn" id="nav-pending" onclick="setView('pending')"><span>☑</span>Pendientes</button>
-    <button class="nav-btn" id="nav-links" onclick="setView('links')"><span>🔗</span>Enlaces</button>
-  </nav>
-
-  <div class="modal" id="tripModal">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h2>Nuevo viaje</h2>
-        <button class="icon-btn" onclick="closeTripModal()">×</button>
-      </div>
-      <input id="tripName" placeholder="Nombre. Ej: Bruselas 2026" />
-      <input id="tripDates" placeholder="Fechas. Ej: 4 - 8 septiembre 2026" />
-      <input id="tripDestination" placeholder="Destino. Ej: Bruselas, Gante y Brujas" />
-      <input id="tripPeople" placeholder="Personas. Ej: Familia de 4" />
-      <input id="tripAccommodation" placeholder="Alojamiento. Ej: Rue Sainte-Catherine" />
-      <textarea id="tripSummary" placeholder="Resumen general del viaje"></textarea>
-      <button class="primary" onclick="saveNewTrip()">Guardar viaje</button>
-    </div>
-  </div>
-
-  <div class="modal" id="dayModal">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h2>Añadir día desde Nota</h2>
-        <button class="icon-btn" onclick="closeDayModal()">×</button>
-      </div>
-      <input id="dayTitle" placeholder="Título. Ej: Viernes 4 septiembre" />
-      <textarea id="dayText" placeholder="Pega aquí la nota completa de ese día desde Notas del iPhone"></textarea>
-      <button class="primary" onclick="saveDayFromNote()">Organizar y guardar día</button>
-      <p class="muted">Detecta horarios, enlaces, mapas, logística, rutas, restaurantes y pendientes.</p>
-    </div>
-  </div>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
-    }
-
-    const KEY = "mis_viajes_pwa";
-    const DARK_KEY = "mis_viajes_dark";
-    let currentView = "summary";
-    let activeTripId = null;
-
-    const sampleTrips = [
-      {
-        id: crypto.randomUUID(),
-        name: "Bruselas 2026",
-        dates: "4 - 8 septiembre 2026",
-        destination: "Bruselas, Gante y Brujas",
-        people: "Familia de 4",
-        accommodation: "Zona Rue Sainte-Catherine",
-        transport: "Vuelo desde Madrid + tren/metro",
-        budget: "Aprox. 1.200 €",
-        favorite: true,
-        summary: "Viaje familiar con base en Bruselas y excursión a Gante y Brujas.",
-        pending: ["Reservar tour Gante y Brujas", "Comprar entradas Atomium"],
-        links: [
-          { label: "Grand Place", url: "https://www.google.com/maps/search/Grand+Place+Bruselas" },
-          { label: "Atomium", url: "https://www.google.com/maps/search/Atomium+Bruselas" }
-        ],
-        notes: "Usar transporte público. Llevar calzado cómodo.",
-        days: [
-          parseDayNote("Viernes 4 septiembre", `🇧🇪 BRUSELAS | VIERNES 4 SEPT 2026
-
-🕘 CRONOGRAMA RÁPIDO
-• 16:25 | ✈️ Llegada Aeropuerto Zaventem
-• 17:25 | 🚆 Tren Aeropuerto → Centro
-• 18:00 | 📍 Llegada a Bruxelles-Central
-• 18:30 | 🏨 Check-in / Descanso
-• 19:30 | 🚶 Paseo Centro Histórico
-• 21:00 | 🍽 Cena Fin de Siècle o Chez Léon
-• 22:30 | 🍺 Delirium Café
-
-🚆 LOGÍSTICA: AEROPUERTO → CENTRO
-Estación destino: Bruxelles-Central. Duración: ~20 min.
-
-🔗 Enlaces útiles:
-• https://www.google.com/maps/search/Brussels+Airport
-• https://www.google.com/maps/search/Bruxelles-Central
-
-🚶 RUTA ESCÉNICA AL ALOJAMIENTO
-1. Mont des Arts
-2. Galerías Saint Hubert
-3. Grand Place
-
-🍽 Restaurantes:
-Fin de Siècle
-Chez Léon
-
-📝 Notas:
-Día suave para llegar, instalarse y pasear.`)
-        ]
-      }
-    ];
-
-    let trips = load();
-    activeTripId = trips[0]?.id || null;
-
-    function load() {
-      const saved = localStorage.getItem(KEY);
-      return saved ? JSON.parse(saved) : sampleTrips;
-    }
-    function save() { localStorage.setItem(KEY, JSON.stringify(trips)); }
-    function activeTrip() { return trips.find(t => t.id === activeTripId) || trips[0]; }
-
-    function toggleDark() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem(DARK_KEY, document.body.classList.contains("dark"));
-    }
-    if (localStorage.getItem(DARK_KEY) === "true") document.body.classList.add("dark");
-
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("open");
-      document.getElementById("overlay").classList.toggle("show");
-    }
-
-    function setView(view) { currentView = view; render(); }
-
-    function render() {
-      const trip = activeTrip();
-      const content = document.getElementById("content");
-      if (!trip) {
-        content.innerHTML = `<div class="card"><h2>Bienvenido</h2><p>Crea tu primer viaje para empezar.</p><button class="primary" onclick="openTripModal()">＋ Añadir viaje</button></div>`;
-        document.getElementById("topTitle").textContent = "Mis Viajes";
-        return;
-      }
-
-      document.getElementById("topTitle").textContent = trip.name;
-      document.getElementById("heroName").textContent = trip.name;
-      document.getElementById("heroMeta").textContent = trip.dates || "Sin fechas";
-      document.getElementById("heroDest").textContent = trip.destination || "Sin destino";
-
-      ["summary","days","pending","links"].forEach(v => {
-        document.getElementById("tab-" + v).classList.toggle("active", currentView === v);
-        document.getElementById("nav-" + v).classList.toggle("active", currentView === v);
-      });
-
-      renderTripList();
-
-      if (currentView === "summary") content.innerHTML = summaryView(trip);
-      if (currentView === "days") content.innerHTML = daysView(trip);
-      if (currentView === "pending") content.innerHTML = pendingView(trip);
-      if (currentView === "links") content.innerHTML = linksView(trip);
-    }
-
-    function renderTripList() {
-      const list = document.getElementById("tripList");
-      list.innerHTML = trips.map(t => `
-        <div class="trip-item ${t.id === activeTripId ? "active" : ""}" onclick="selectTrip('${t.id}')">
-          <div class="thumb">🧳</div>
-          <div>
-            <strong>${t.favorite ? "★ " : ""}${escapeHtml(t.name)}</strong>
-            <small>${escapeHtml(t.dates || "")}</small>
-            <small>${escapeHtml(t.destination || "")}</small>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function selectTrip(id) {
-      activeTripId = id;
-      currentView = "summary";
-      toggleSidebar();
-      render();
-    }
-
-    function summaryView(trip) {
-      return `
-        <div class="card">
-          <h2>Resumen del viaje</h2>
-          <p>${escapeHtml(trip.summary || "Sin resumen todavía.")}</p>
-          <div>
-            <div class="info-row"><div>👥</div><div><strong>Personas</strong><br><span class="muted">${escapeHtml(trip.people || "Sin indicar")}</span></div></div>
-            <div class="info-row"><div>🚆</div><div><strong>Transporte</strong><br><span class="muted">${escapeHtml(trip.transport || "Sin indicar")}</span></div></div>
-            <div class="info-row"><div>🏨</div><div><strong>Alojamiento</strong><br><span class="muted">${escapeHtml(trip.accommodation || "Sin indicar")}</span></div></div>
-            <div class="info-row"><div>💶</div><div><strong>Presupuesto</strong><br><span class="muted">${escapeHtml(trip.budget || "Opcional")}</span></div></div>
-          </div>
-          <div class="actions">
-            <button class="secondary" onclick="copyTripSummary()">Copiar resumen</button>
-            <button class="secondary" onclick="openDayModal()">＋ Añadir día</button>
-            <button class="danger" onclick="deleteTrip()">Eliminar viaje</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Notas rápidas</h3>
-          <textarea id="tripNotes">${escapeHtml(trip.notes || "")}</textarea>
-          <button class="primary" onclick="saveTripNotes()">Guardar notas</button>
-        </div>
-      `;
-    }
-
-    function daysView(trip) {
-      const q = document.getElementById("search").value.toLowerCase();
-      const days = (trip.days || []).filter(d => JSON.stringify(d).toLowerCase().includes(q));
-      return `
-        <div class="card">
-          <h2>Itinerario por días</h2>
-          <p class="muted">Añade cada nota del iPhone como un día independiente.</p>
-          <button class="primary" onclick="openDayModal()">＋ Añadir día desde Nota</button>
-        </div>
-        ${days.length ? days.map((d, i) => dayCard(d, i)).join("") : `<div class="empty">No hay días o no hay resultados.</div>`}
-      `;
-    }
-
-    function dayCard(day, index) {
-      return `
-        <div class="card day-card">
-          <div class="day-head">
-            <div><h3>${escapeHtml(day.title)}</h3><p class="muted">${escapeHtml(day.subtitle || "Día del viaje")}</p></div>
-            <button class="secondary" onclick="copyDay(${index})">Copiar</button>
-          </div>
-          ${day.times.length ? `<div class="section-block"><h4>⏰ Cronograma rápido</h4><div class="timeline">${day.times.map(t => `<div class="time-item"><div class="time">${escapeHtml(t.time)}</div><div>${linkify(escapeHtml(t.text))}</div></div>`).join("")}</div></div>` : ""}
-          ${day.logistics.length ? block("🚆 Logística / transporte", day.logistics) : ""}
-          ${day.routes.length ? block("🗺 Rutas", day.routes) : ""}
-          ${day.restaurants.length ? block("🍽 Restaurantes", day.restaurants) : ""}
-          ${day.links.length ? linksBlock(day.links) : ""}
-          ${day.pending.length ? block("☑ Pendiente", day.pending) : ""}
-          ${day.notes.length ? block("📝 Notas importantes", day.notes) : ""}
-          <details class="section-block"><summary><strong>Ver nota original</strong></summary><p class="raw-note">${linkify(escapeHtml(day.raw))}</p></details>
-          <div class="actions"><button class="danger" onclick="deleteDay(${index})">Eliminar día</button></div>
-        </div>
-      `;
-    }
-
-    function block(title, arr) {
-      return `<div class="section-block"><h4>${title}</h4>${arr.map(x => `<p>• ${linkify(escapeHtml(x))}</p>`).join("")}</div>`;
-    }
-
-    function linksBlock(arr) {
-      return `<div class="section-block"><h4>🔗 Enlaces útiles</h4>${arr.map(x => `<div class="link-card"><a href="${x.url}" target="_blank">${escapeHtml(x.label)}</a><div class="muted">${escapeHtml(x.url)}</div></div>`).join("")}</div>`;
-    }
-
-    function pendingView(trip) {
-      return `
-        <div class="card"><h2>Pendiente de reservar</h2><input id="newPending" placeholder="Ej: Reservar restaurante..." /><button class="primary" onclick="addPending()">Añadir pendiente</button></div>
-        <div class="card">${(trip.pending || []).length ? trip.pending.map((p, i) => `<div class="checkbox-line"><span class="dot"></span><div style="flex:1">${escapeHtml(p)}</div><button class="danger" onclick="removePending(${i})">×</button></div>`).join("") : `<p class="muted">No hay pendientes.</p>`}</div>
-      `;
-    }
-
-    function linksView(trip) {
-      return `
-        <div class="card"><h2>Documentos / enlaces útiles</h2><input id="newLinkLabel" placeholder="Nombre del enlace" /><input id="newLinkUrl" placeholder="URL" /><button class="primary" onclick="addLink()">Añadir enlace</button></div>
-        ${(trip.links || []).length ? trip.links.map((l, i) => `<div class="card"><a href="${l.url}" target="_blank">${escapeHtml(l.label)}</a><p class="muted">${escapeHtml(l.url)}</p><button class="danger" onclick="removeLink(${i})">Eliminar</button></div>`).join("") : `<div class="empty">No hay enlaces todavía.</div>`}
-      `;
-    }
-
-    function parseDayNote(title, raw) {
-      const lines = raw.split(/\n/).map(l => l.trim()).filter(Boolean);
-      const day = { id: crypto.randomUUID(), title: title || "Día sin título", subtitle: "", raw, times: [], logistics: [], routes: [], restaurants: [], links: [], pending: [], notes: [] };
-      const firstTitle = lines.find(l => l.length > 8 && /BRUSELAS|CONIL|SEVILLA|LONDRES|ROMA|DÍA|DIA/i.test(l));
-      if (firstTitle) day.subtitle = firstTitle.replace(/[🇧🇪🇪🇸🇬🇧🇮🇹]/g, "").trim();
-      let section = "notes";
-
-      for (const line of lines) {
-        const clean = line.replace(/^[-•]\s*/, "").trim();
-        if (/CRONOGRAMA|HORARIO/i.test(clean)) { section = "times"; continue; }
-        if (/LOGÍSTICA|LOGISTICA|TRANSPORTE|AEROPUERTO|METRO|TREN|BUS/i.test(clean)) section = "logistics";
-        if (/RUTA|PASEO|ESCÉNICA|ESCENICA|ITINERARIO/i.test(clean)) section = "routes";
-        if (/RESTAURANTE|CENA|COMIDA|DESAYUNO|BAR|CAFÉ|CAFE|TAPAS/i.test(clean)) section = "restaurants";
-        if (/ENLACES|MAPS|GOOGLE MAPS|UBICACIÓN|UBICACION/i.test(clean)) section = "links";
-        if (/PENDIENTE|RESERVAR|ENTRADAS|BILLETES|COMPRAR/i.test(clean)) section = "pending";
-
-        const timeMatch = clean.match(/(\d{1,2}:\d{2})\s*[|–-]?\s*(.*)/);
-        if (timeMatch) { day.times.push({ time: timeMatch[1], text: timeMatch[2] || clean }); continue; }
-
-        const urlMatch = clean.match(/https?:\/\/\S+/);
-        if (urlMatch) { day.links.push({ label: labelFromUrlOrLine(clean), url: urlMatch[0] }); continue; }
-
-        if (section === "logistics") day.logistics.push(clean);
-        else if (section === "routes") day.routes.push(clean);
-        else if (section === "restaurants") day.restaurants.push(clean);
-        else if (section === "links") { if (clean.length > 4) day.links.push({ label: clean, url: googleSearchUrl(clean) }); }
-        else if (section === "pending") day.pending.push(clean);
-        else day.notes.push(clean);
-      }
-
-      day.logistics = unique(day.logistics).filter(x => !/LOGÍSTICA|LOGISTICA/i.test(x));
-      day.routes = unique(day.routes).filter(x => !/RUTA/i.test(x));
-      day.restaurants = unique(day.restaurants).filter(x => !/RESTAURANTE/i.test(x));
-      day.pending = unique(day.pending);
-      day.notes = unique(day.notes).filter(x => x !== day.subtitle);
-      return day;
-    }
-
-    function labelFromUrlOrLine(line) {
-      const withoutUrl = line.replace(/https?:\/\/\S+/, "").replace(/[•🔗📍🎟]/g, "").trim();
-      return withoutUrl || "Abrir enlace";
-    }
-    function googleSearchUrl(text) { return "https://www.google.com/maps/search/" + encodeURIComponent(text.replace(/[📍🎟🔗]/g, "").trim()); }
-    function unique(arr) { return [...new Set(arr.filter(Boolean))]; }
-    function linkify(text) { return text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>'); }
-    function escapeHtml(str) { return String(str || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
-
-    function openTripModal() { document.getElementById("tripModal").classList.add("show"); }
-    function closeTripModal() { document.getElementById("tripModal").classList.remove("show"); }
-    function openDayModal() { document.getElementById("dayModal").classList.add("show"); }
-    function closeDayModal() { document.getElementById("dayModal").classList.remove("show"); }
-
-    function saveNewTrip() {
-      const name = document.getElementById("tripName").value.trim();
-      if (!name) return alert("Pon un nombre al viaje.");
-      const trip = {
-        id: crypto.randomUUID(), name,
-        dates: document.getElementById("tripDates").value.trim(),
-        destination: document.getElementById("tripDestination").value.trim(),
-        people: document.getElementById("tripPeople").value.trim(),
-        accommodation: document.getElementById("tripAccommodation").value.trim(),
-        transport: "", budget: "", favorite: false,
-        summary: document.getElementById("tripSummary").value.trim(),
-        pending: [], links: [], notes: "", days: []
-      };
-      trips.push(trip); activeTripId = trip.id; save(); closeTripModal(); render();
-    }
-
-    function saveDayFromNote() {
-      const title = document.getElementById("dayTitle").value.trim();
-      const text = document.getElementById("dayText").value.trim();
-      if (!text) return alert("Pega la nota del día.");
-      const trip = activeTrip();
-      const parsed = parseDayNote(title || "Nuevo día", text);
-      trip.days = trip.days || [];
-      trip.days.push(parsed);
-      trip.pending = unique([...(trip.pending || []), ...parsed.pending]);
-      trip.links = [...(trip.links || []), ...parsed.links];
-      save();
-      document.getElementById("dayTitle").value = "";
-      document.getElementById("dayText").value = "";
-      closeDayModal(); currentView = "days"; render();
-    }
-
-    function toggleFavoriteActive() { const trip = activeTrip(); trip.favorite = !trip.favorite; save(); render(); }
-    function saveTripNotes() { activeTrip().notes = document.getElementById("tripNotes").value; save(); alert("Notas guardadas"); }
-    function copyTripSummary() { const t = activeTrip(); navigator.clipboard.writeText(`${t.name}\n${t.dates}\n${t.destination}\n\n${t.summary}`); alert("Resumen copiado"); }
-    function copyDay(index) { const d = activeTrip().days[index]; navigator.clipboard.writeText(d.raw); alert("Día copiado"); }
-    function deleteDay(index) { if (!confirm("¿Eliminar este día?")) return; activeTrip().days.splice(index, 1); save(); render(); }
-    function deleteTrip() { if (!confirm("¿Eliminar este viaje completo?")) return; trips = trips.filter(t => t.id !== activeTripId); activeTripId = trips[0]?.id || null; save(); render(); }
-    function addPending() { const input = document.getElementById("newPending"); const val = input.value.trim(); if (!val) return; activeTrip().pending.push(val); save(); render(); }
-    function removePending(i) { activeTrip().pending.splice(i, 1); save(); render(); }
-    function addLink() { const label = document.getElementById("newLinkLabel").value.trim(); const url = document.getElementById("newLinkUrl").value.trim(); if (!label || !url) return alert("Pon nombre y URL."); activeTrip().links.push({ label, url }); save(); render(); }
-    function removeLink(i) { activeTrip().links.splice(i, 1); save(); render(); }
-
-    render();
-  </script>
+<div class="top"><button class="round" onclick="toggleSide()">☰</button><div class="title" id="topTitle">Mis Viajes</div><button class="round" onclick="fav()">★</button><button class="round" onclick="dark()">☾</button></div>
+<div class="shade" id="shade" onclick="toggleSide()"></div>
+<aside class="side" id="side"><div class="sidehead"><h2>🧳 Mis viajes</h2><button class="round" onclick="toggleSide()">×</button></div><div id="tripList"></div><button class="primary" onclick="openTrip()">+ Añadir viaje</button></aside>
+<main>
+<section class="hero"><h1 id="heroName">Mis Viajes</h1><p id="heroDates"></p><p id="heroDest"></p></section>
+<div class="tabs"><button id="t-summary" class="tab active" onclick="view='summary';render()"><span>▦</span><small>Resumen</small></button><button id="t-days" class="tab" onclick="view='days';render()"><span>🗓</span><small>Itinerario</small></button><button id="t-pending" class="tab" onclick="view='pending';render()"><span>☑</span><small>Pendientes</small></button><button id="t-links" class="tab" onclick="view='links';render()"><span>🔗</span><small>Enlaces</small></button></div>
+<input id="search" class="search" placeholder="Buscar día, restaurante, mapa, palabra..." oninput="render()">
+<section id="content"></section>
+</main>
+<nav class="bottom"><button id="n-summary" class="nav active" onclick="view='summary';render()"><span>▦</span>Resumen</button><button id="n-days" class="nav" onclick="view='days';render()"><span>🗓</span>Días</button><button id="n-pending" class="nav" onclick="view='pending';render()"><span>☑</span>Pendientes</button><button id="n-links" class="nav" onclick="view='links';render()"><span>🔗</span>Enlaces</button></nav>
+<div class="modal" id="tripModal"><div class="box"><div class="boxhead"><h2>Nuevo viaje</h2><button class="round" onclick="closeTrip()">×</button></div><input id="tripName" placeholder="Nombre: Bruselas 2026"><input id="tripDates" placeholder="Fechas: 4 - 8 septiembre 2026"><input id="tripDest" placeholder="Destino"><input id="tripPeople" placeholder="Personas"><input id="tripHotel" placeholder="Alojamiento"><textarea id="tripSummary" placeholder="Resumen"></textarea><button class="primary" onclick="saveTrip()">Guardar viaje</button></div></div>
+<div class="modal" id="dayModal"><div class="box"><div class="boxhead"><h2>Añadir día desde Nota</h2><button class="round" onclick="closeDay()">×</button></div><input id="dayTitle" placeholder="Viernes 4 septiembre 2026"><textarea id="dayText" placeholder="Pega aquí la nota completa"></textarea><button class="primary" onclick="saveDay()">Organizar y guardar día</button><p class="muted">Versión corregida: el botón guarda el día y cierra esta ventana.</p></div></div>
+<script>
+const KEY="mis_viajes_ok_v1";let view="summary";let active=null;let trips=load();
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function starter(){return[{id:id(),name:"Bruselas 2026",dates:"4 - 8 septiembre 2026",dest:"Bruselas, Gante y Brujas",people:"Familia de 4",hotel:"",summary:"Viaje familiar con base en Bruselas.",favorite:false,pending:[],links:[],notes:"",days:[]}]}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||starter()}catch(e){return starter()}}
+function save(){localStorage.setItem(KEY,JSON.stringify(trips))}
+active=trips[0]?.id||null;
+function trip(){return trips.find(x=>x.id===active)||trips[0]}
+function esc(s){return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function link(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>')}
+function toggleSide(){side.classList.toggle("open");shade.classList.toggle("show")}
+function dark(){document.body.classList.toggle("dark")}
+function openTrip(){tripModal.classList.add("show")}function closeTrip(){tripModal.classList.remove("show")}function openDay(){dayModal.classList.add("show")}function closeDay(){dayModal.classList.remove("show")}
+function setActive(x){active=x;view="summary";toggleSide();render()}
+function renderTrips(){tripList.innerHTML=trips.map(t=>`<div class="trip ${t.id===active?'active':''}" onclick="setActive('${t.id}')"><div class="thumb">🧳</div><div><b>${t.favorite?'★ ':''}${esc(t.name)}</b><small>${esc(t.dates)}</small><small>${esc(t.dest)}</small></div></div>`).join("")}
+function render(){renderTrips();["summary","days","pending","links"].forEach(v=>{document.getElementById("t-"+v).classList.toggle("active",view===v);document.getElementById("n-"+v).classList.toggle("active",view===v)});let t=trip();if(!t){topTitle.textContent="Mis Viajes";heroName.textContent="Mis Viajes";heroDates.textContent="";heroDest.textContent="";content.innerHTML=`<div class="card"><h2>Bienvenido</h2><p>Crea tu primer viaje.</p><button class="primary" onclick="openTrip()">+ Añadir viaje</button></div>`;return}
+topTitle.textContent=t.name;heroName.textContent=t.name;heroDates.textContent=t.dates;heroDest.textContent=t.dest;
+if(view==="summary")content.innerHTML=summary(t); if(view==="days")content.innerHTML=days(t); if(view==="pending")content.innerHTML=pending(t); if(view==="links")content.innerHTML=linksView(t)}
+function summary(t){return `<div class="card"><h2>Resumen del viaje</h2><p>${esc(t.summary)}</p><div class="row"><div>👥</div><div><b>Personas</b><br><span class="muted">${esc(t.people||"Sin indicar")}</span></div></div><div class="row"><div>🏨</div><div><b>Alojamiento</b><br><span class="muted">${esc(t.hotel||"Sin indicar")}</span></div></div><div class="actions"><button class="secondary" onclick="openDay()">+ Añadir día</button><button class="danger" onclick="delTrip()">Eliminar viaje</button></div></div>`}
+function days(t){let q=search.value.toLowerCase();let ds=(t.days||[]).filter(d=>JSON.stringify(d).toLowerCase().includes(q));return `<div class="card"><h2>Itinerario por días</h2><button class="primary" onclick="openDay()">+ Añadir día desde Nota</button></div>${ds.length?ds.map((d,i)=>dayCard(d,i)).join(""):'<div class="empty">No hay días o no hay resultados.</div>'}`}
+function dayCard(d,i){return `<div class="card day"><div class="head"><div><h3>${esc(d.title)}</h3><p class="muted">${esc(d.subtitle)}</p></div><button class="secondary" onclick="navigator.clipboard.writeText(trip().days[${i}].raw)">Copiar</button></div>${d.times.length?`<div class="block"><h4>⏰ Cronograma rápido</h4>${d.times.map(x=>`<div class="timeitem"><div class="time">${esc(x.time)}</div><div>${link(x.text)}</div></div>`).join("")}</div>`:""}${block("🚆 Logística",d.logistics)}${block("🗺 Rutas",d.routes)}${block("🍽 Restaurantes",d.restaurants)}${linksBlock(d.links)}${block("☑ Pendiente",d.pending)}${block("📝 Notas",d.notes)}<details class="block"><summary><b>Ver nota original</b></summary><p class="raw">${link(d.raw)}</p></details><div class="actions"><button class="danger" onclick="delDay(${i})">Eliminar día</button></div></div>`}
+function block(title,arr){return arr&&arr.length?`<div class="block"><h4>${title}</h4>${arr.map(x=>`<p>• ${link(x)}</p>`).join("")}</div>`:""}
+function linksBlock(arr){return arr&&arr.length?`<div class="block"><h4>🔗 Enlaces útiles</h4>${arr.map(x=>`<div class="linkcard"><a href="${esc(x.url)}" target="_blank">${esc(x.label)}</a><div class="muted">${esc(x.url)}</div></div>`).join("")}</div>`:""}
+function pending(t){return `<div class="card"><h2>Pendiente de reservar</h2><input id="newPending" placeholder="Nuevo pendiente"><button class="primary" onclick="addPending()">Añadir</button></div><div class="card">${t.pending.length?t.pending.map((p,i)=>`<p>○ ${esc(p)} <button class="danger" onclick="remPending(${i})">×</button></p>`).join(""):"<p class='muted'>No hay pendientes.</p>"}</div>`}
+function linksView(t){return `<div class="card"><h2>Enlaces útiles</h2><input id="lab" placeholder="Nombre"><input id="url" placeholder="URL"><button class="primary" onclick="addLink()">Añadir enlace</button></div>${t.links.length?t.links.map((l,i)=>`<div class="card"><a href="${esc(l.url)}" target="_blank">${esc(l.label)}</a><p class="muted">${esc(l.url)}</p><button class="danger" onclick="remLink(${i})">Eliminar</button></div>`).join(""):"<div class='empty'>No hay enlaces.</div>"}`}
+function saveTrip(){let name=tripName.value.trim();if(!name)return alert("Pon nombre al viaje");let t={id:id(),name,dates:tripDates.value.trim(),dest:tripDest.value.trim(),people:tripPeople.value.trim(),hotel:tripHotel.value.trim(),summary:tripSummary.value.trim(),favorite:false,pending:[],links:[],notes:"",days:[]};trips.push(t);active=t.id;save();closeTrip();render()}
+function parseDay(title,raw){let d={id:id(),title:title||"Nuevo día",subtitle:"",raw,times:[],logistics:[],routes:[],restaurants:[],links:[],pending:[],notes:[]};let lines=raw.split(/\n/).map(x=>x.trim()).filter(Boolean);d.subtitle=(lines.find(x=>/BRUSELAS|CONIL|SEVILLA|LONDRES|ROMA|DÍA|DIA/i.test(x))||"").replace(/[🇧🇪🇪🇸🇬🇧🇮🇹]/g,"").trim();let sec="notes";for(let line of lines){let c=line.replace(/^[-*•]\s*/,"").trim();if(/CRONOGRAMA|HORARIO/i.test(c)){sec="times";continue}if(/LOGÍSTICA|LOGISTICA|TRANSPORTE|AEROPUERTO|METRO|TREN|BUS/i.test(c))sec="logistics";if(/RUTA|PASEO|ESCÉNICA|ESCENICA|ITINERARIO/i.test(c))sec="routes";if(/RESTAURANTE|CENA|COMIDA|DESAYUNO|BAR|CAFÉ|CAFE|DELIRIUM|OPCIONES/i.test(c))sec="restaurants";if(/ENLACES|MAPS|GOOGLE MAPS|UBICACIÓN|UBICACION/i.test(c))sec="links";if(/PENDIENTE|RESERVAR|ENTRADAS|BILLETES|COMPRAR/i.test(c))sec="pending";let tm=c.match(/(\d{1,2}:\d{2})\s*[|–-]?\s*(.*)/);if(tm){d.times.push({time:tm[1],text:tm[2]||c});continue}let u=c.match(/https?:\/\/\S+/);if(u){d.links.push({label:c.replace(u[0],"").trim()||"Abrir enlace",url:u[0]});continue}if(sec==="logistics")d.logistics.push(c);else if(sec==="routes")d.routes.push(c);else if(sec==="restaurants")d.restaurants.push(c);else if(sec==="pending")d.pending.push(c);else if(sec==="links")d.links.push({label:c,url:"https://www.google.com/maps/search/"+encodeURIComponent(c.replace(/[📍🎟🔗]/g,"").trim())});else d.notes.push(c)}return d}
+function saveDay(){try{let t=trip();if(!t)return alert("Primero crea un viaje");let raw=dayText.value.trim();if(!raw)return alert("Pega la nota");let d=parseDay(dayTitle.value.trim(),raw);t.days=t.days||[];t.days.push(d);t.pending=[...(t.pending||[]),...d.pending];t.links=[...(t.links||[]),...d.links];save();dayTitle.value="";dayText.value="";closeDay();view="days";render();alert("Día guardado")}catch(e){alert("Error guardando: "+e.message)}}
+function fav(){let t=trip();if(t){t.favorite=!t.favorite;save();render()}}function delTrip(){if(confirm("¿Eliminar viaje completo?")){trips=trips.filter(x=>x.id!==active);active=trips[0]?.id||null;save();render()}}function delDay(i){if(confirm("¿Eliminar día?")){trip().days.splice(i,1);save();render()}}function addPending(){if(newPending.value.trim()){trip().pending.push(newPending.value.trim());save();render()}}function remPending(i){trip().pending.splice(i,1);save();render()}function addLink(){if(lab.value.trim()&&url.value.trim()){trip().links.push({label:lab.value.trim(),url:url.value.trim()});save();render()}}function remLink(i){trip().links.splice(i,1);save();render()}
+render();
+</script>
 </body>
 </html>
