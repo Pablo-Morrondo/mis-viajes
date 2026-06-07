@@ -1,4 +1,4 @@
-const KEY="viajes_planes_v11_day_parser";
+const KEY="viajes_planes_v12_day_parser";
 let db=load(), view="home", activeTripId=db.trips[0]?.id||null, tab="days";
 
 const $=id=>document.getElementById(id);
@@ -32,7 +32,7 @@ function render(){
   if(view==="docs")docs();
 }
 function home(){
-  $("app").innerHTML=`<section class="hero"><div class="txt"><h1>Viajes & Planes</h1><p>Importador limpio de notas Apple Notes</p></div></section>
+  $("app").innerHTML=`<section class="hero"><div class="txt"><h1>Viajes & Planes</h1><p>V12: enlaces dentro de cada bloque, sin botones duplicados arriba</p></div></section>
   <div class="grid"><div class="stat"><span>${db.trips.length}</span>Viajes</div><div class="stat"><span>${db.events.length}</span>Eventos</div><div class="stat"><span>${db.reservations.length}</span>Reservas</div><div class="stat"><span>${db.docs.length}</span>Docs</div></div>
   <div class="card"><h2>Viajes</h2>${db.trips.map(tripRow).join("")||"<p class='muted'>Sin viajes.</p>"}</div>`;
 }
@@ -52,7 +52,7 @@ function tripContent(t){
   return `<div class="card"><h2>Documentos del viaje</h2><button class="primary" onclick="docForm('${t.id}')">+ Añadir documento</button>${db.docs.filter(d=>d.tripId===t.id).map(docCard).join("")||"<p class='muted'>Sin documentos.</p>"}</div>`;
 }
 function dayCard(d){
-  return`<div class="noteCard"><button class="noteHead" onclick="this.parentElement.classList.toggle('open')"><span>${iconForDay(d)}</span><strong>${esc(d.title)}</strong><span>⌄</span></button><div class="noteBody">${d.links.length?`<div class="quickLinks">${d.links.map(l=>`<a href="${esc(l.url)}" target="_blank">${esc(l.label)}</a>`).join("")}</div>`:""}${renderDay(d)}<details><summary><strong>Ver texto original</strong></summary><div class="rawText">${esc(d.raw)}</div></details><div class="actions"><button class="secondary" onclick="copyDay('${d.id}')">Copiar</button><button class="danger" onclick="deleteDay('${d.id}')">Eliminar</button></div></div></div>`;
+  return`<div class="noteCard"><button class="noteHead" onclick="this.parentElement.classList.toggle('open')"><span>${iconForDay(d)}</span><strong>${esc(d.title)}</strong><span>⌄</span></button><div class="noteBody">${renderDay(d)}<details><summary><strong>Ver texto original</strong></summary><div class="rawText">${esc(d.raw)}</div></details><div class="actions"><button class="secondary" onclick="copyDay('${d.id}')">Copiar</button><button class="danger" onclick="deleteDay('${d.id}')">Eliminar</button></div></div></div>`;
 }
 function renderDay(d){
   let html = "";
@@ -67,7 +67,13 @@ function renderDay(d){
 }
 function formatLine(line){
   let u=line.match(/https?:\/\/\S+/);
-  if(u) return `<p><a href="${esc(u[0])}" target="_blank">${u[0].includes("maps")||u[0].includes("google")?"Abrir Maps":"Abrir enlace"}</a></p>`;
+  if(u){
+    let url=u[0];
+    let label=(url.includes("maps")||url.includes("google"))?"Abrir Maps":"Abrir enlace";
+    let text=line.replace(url,"").trim();
+    if(text) return `<p>${esc(text)}<br><a href="${esc(url)}" target="_blank">${label}</a></p>`;
+    return `<p><a href="${esc(url)}" target="_blank">${label}</a></p>`;
+  }
   return `<p>${esc(line)}</p>`;
 }
 function iconForDay(d){let x=norm(d.title+" "+d.raw);if(/parking|distancia|coche|tren|aeropuerto/.test(x))return"🚗";if(/restaurante|cena|comida|bar|cerveza|copa|trifulca|casa juan/.test(x))return"🍽";if(/hotel|alojamiento|chalet/.test(x))return"🏨";return"📅"}
