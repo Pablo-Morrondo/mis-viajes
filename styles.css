@@ -33,9 +33,12 @@ textarea{min-height:230px;line-height:1.45}
 .noteCard{border:1px solid var(--line);border-radius:22px;background:var(--card);margin:12px 0;overflow:hidden;box-shadow:var(--shadow)}
 .noteHead{width:100%;background:transparent;color:var(--text);display:flex;align-items:center;gap:12px;padding:16px;text-align:left}.noteHead strong{flex:1;font-size:18px}
 .noteBody{display:none;padding:0 16px 16px;border-top:1px solid var(--line)}.noteCard.open .noteBody{display:block}
-.noteText{white-space:pre-wrap;line-height:1.55;font-size:16px}
 .quickLinks{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.quickLinks a{background:var(--soft);padding:9px 11px;border-radius:14px}
-.place{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0}
+.noteSection{margin:14px 0 8px;padding:13px;border-radius:18px;background:var(--bg);border:1px solid var(--line)}
+.noteSection h3{font-size:18px;margin:0 0 8px}.noteSection p{margin:6px 0;line-height:1.45}
+.timeLine{display:grid;grid-template-columns:110px 1fr;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;margin:7px 0}
+.timeLine b{color:var(--accent)}
+.rawText{white-space:pre-wrap;line-height:1.55;font-size:15px}
 .side{position:fixed;z-index:40;inset:0 auto 0 -330px;width:320px;max-width:86vw;background:#111827;color:white;padding:calc(env(safe-area-inset-top) + 18px) 15px 30px;transition:.25s;box-shadow:18px 0 40px #0007}.side.open{left:0}
 .sideHead{display:flex;align-items:center;justify-content:space-between}.sideHead h1{font-size:25px}
 .side button{width:100%;text-align:left;background:#ffffff12;color:white;padding:14px;margin:6px 0}.side button.active{background:var(--accent)}.side hr{border:0;border-top:1px solid #ffffff22;margin:14px 0}
