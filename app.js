@@ -1,4 +1,4 @@
-const KEY="viajes_planes_v13_day_parser";
+const KEY="viajes_planes_v14";
 let db=load(), view="home", activeTripId=db.trips[0]?.id||null, tab="days";
 
 const $=id=>document.getElementById(id);
@@ -32,14 +32,13 @@ function render(){
   if(view==="docs")docs();
 }
 function home(){
-  $("app").innerHTML=`<section class="hero"><div class="txt"><h1>Viajes & Planes</h1><p>V13: mapas asociados al bloque correcto</p></div></section>
+  $("app").innerHTML=`<section class="hero"><div class="txt"><h1>Viajes & Planes</h1><p>V14: URLs ocultas y mapas dentro de su bloque</p></div></section>
   <div class="grid"><div class="stat"><span>${db.trips.length}</span>Viajes</div><div class="stat"><span>${db.events.length}</span>Eventos</div><div class="stat"><span>${db.reservations.length}</span>Reservas</div><div class="stat"><span>${db.docs.length}</span>Docs</div></div>
   <div class="card"><h2>Viajes</h2>${db.trips.map(tripRow).join("")||"<p class='muted'>Sin viajes.</p>"}</div>`;
 }
 function tripRow(t){return`<div class="item" onclick="activeTripId='${t.id}';view='trips';render()"><div class="thumb">${t.image?`<img src="${esc(t.image)}">`:"✈️"}</div><div><strong>${esc(t.name)}</strong><br><span class="muted">${esc(t.dates)} · ${esc(t.destination)}</span></div><div class="chev">›</div></div>`}
 function trips(){
-  const t=trip(); if(!t){$("app").innerHTML=`<div class="card"><button class="primary" onclick="tripForm()">+ Nuevo viaje</button></div>`;return}
-  if(!t.days) t.days = t.notes ? t.notes.map(n=>parseDay(n.title+"\n"+n.body)) : [];
+  const t=trip();
   $("app").innerHTML=`<section class="hero">${t.image?`<img src="${esc(t.image)}">`:""}<div class="txt"><h1>${esc(t.name)}</h1><p>${esc(t.dates)}</p><p>${esc(t.destination)}</p></div></section>
   <div class="tabs"><button class="tab ${tab==='days'?'active':''}" onclick="tab='days';render()">📅 Días</button><button class="tab ${tab==='links'?'active':''}" onclick="tab='links';render()">📍 Enlaces</button><button class="tab ${tab==='docs'?'active':''}" onclick="tab='docs';render()">📂 Docs</button></div>
   <div class="card"><h2>${esc(t.name)}</h2><span class="pill">${t.days.length} días/notas</span><span class="pill">${allLinks(t).length} enlaces</span><p>${esc(t.summary||"")}</p><p><b>👥 Personas:</b> ${esc(t.people||"Sin indicar")}</p><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")} ${hotelLink(t)}</p><div class="actions"><button class="secondary" onclick="tripForm('${t.id}')">Editar viaje</button><button class="secondary" onclick="dayForm()">Añadir día</button><button class="secondary" onclick="folderImport()">Importar varios</button><button class="danger" onclick="deleteTrip('${t.id}')">Eliminar</button></div></div>
@@ -55,87 +54,87 @@ function dayCard(d){
   return`<div class="noteCard"><button class="noteHead" onclick="this.parentElement.classList.toggle('open')"><span>${iconForDay(d)}</span><strong>${esc(d.title)}</strong><span>⌄</span></button><div class="noteBody">${renderDay(d)}<details><summary><strong>Ver texto original</strong></summary><div class="rawText">${esc(d.raw)}</div></details><div class="actions"><button class="secondary" onclick="copyDay('${d.id}')">Copiar</button><button class="danger" onclick="deleteDay('${d.id}')">Eliminar</button></div></div></div>`;
 }
 function renderDay(d){
-  let html = "";
-  d.sections.forEach(sec=>{
+  return d.sections.map(sec=>{
     if(sec.type==="time"){
-      html += `<div class="timeLine"><b>${esc(sec.title)}</b><span>${sec.lines.map(x=>formatInline(x)).join("<br>")}</span></div>`;
-    } else {
-      html += `<section class="noteSection"><h3>${esc(sec.title)}</h3>${sec.lines.map(line=>formatLine(line)).join("")}</section>`;
+      return `<div class="timeLine"><b>${esc(sec.title)}</b><span>${sec.lines.map(formatInline).join("<br>")}</span></div>`;
     }
-  });
-  return html || `<div class="rawText">${esc(d.raw)}</div>`;
+    return `<section class="noteSection"><h3>${esc(sec.title)}</h3>${sec.lines.map(formatLine).join("")}</section>`;
+  }).join("") || `<div class="rawText">${esc(d.raw)}</div>`;
 }
 function formatInline(line){
   let u=line.match(/https?:\/\/\S+/);
   if(!u) return esc(line);
   let text=line.replace(u[0],"").trim();
-  let label=(u[0].includes("maps")||u[0].includes("google"))?"Abrir Maps":"Abrir enlace";
-  return `${text?esc(text)+" ":""}<a href="${esc(u[0])}" target="_blank">${label}</a>`;
+  let label=isMap(u[0])?"Abrir Maps":"Abrir enlace";
+  return `${text?esc(text)+" ":""}<a class="mapBtn" href="${esc(u[0])}" target="_blank">${label}</a>`;
 }
 function formatLine(line){
-  line = clean(line).trim();
-  if(!line) return "";
-  if(/^[-—_⸻]{2,}$/.test(line)) return "";
+  line=clean(line).trim();
+  if(!line || /^[-—_⸻]{2,}$/.test(line)) return "";
   let u=line.match(/https?:\/\/\S+/);
   if(u){
-    let url=u[0];
-    let label=(url.includes("maps")||url.includes("google"))?"Abrir Maps":"Abrir enlace";
-    let text=line.replace(url,"").trim();
-    if(text) return `<p>${esc(text)}<br><a href="${esc(url)}" target="_blank">${label}</a></p>`;
-    return `<p><a href="${esc(url)}" target="_blank">${label}</a></p>`;
+    let text=line.replace(u[0],"").trim();
+    let label=isMap(u[0])?"Abrir Maps":"Abrir enlace";
+    return `<p>${text?esc(text)+"<br>":""}<a class="mapBtn" href="${esc(u[0])}" target="_blank">${label}</a></p>`;
   }
+  if(/^✅/.test(line)) return `<p>${esc(line)}</p>`;
   if(/^✔|^✓/.test(line)) return `<p>✅ ${esc(line.replace(/^✔|^✓/,"").trim())}</p>`;
   return `<p>${esc(line)}</p>`;
 }
+function isMap(url){return /maps|google/i.test(url)}
+
 function parseDay(raw){
   raw=clean(raw).trim();
   let lines=raw.split("\n").map(x=>x.trim()).filter(Boolean);
   let title=lines[0]?.replace(/^---+|---+$/g,"").trim()||"Día";
   if(lines[1] && norm(lines[1])===norm(title)) lines.splice(1,1);
   let d={id:uid(),title,raw,sections:[],links:extractLinks(raw)};
-  let current=null;
+  let current=null, lastNamed=null;
+
   function push(){ if(current && current.lines.length) d.sections.push(current); current=null; }
-  function ensureSection(title){
-    if(!current) current={type:"section",title,lines:[]};
-  }
+  function startSection(title){ push(); current={type:"section",title,lines:[]}; lastNamed=title; }
+  function ensureSection(title="Notas"){ if(!current) current={type:"section",title,lines:[]}; }
+
   for(let i=1;i<lines.length;i++){
     let line=lines[i];
+
     if(/^[-—_⸻]{2,}$/.test(line)){ push(); continue; }
 
-    // URLs must never become section titles. Attach them to current/previous block.
     let url=line.match(/https?:\/\/\S+/);
     if(url){
-      ensureSection("Enlace");
+      // Never create a URL title. Attach URL to current block.
+      ensureSection(lastNamed || "Enlace");
       current.lines.push(line);
       continue;
     }
 
     let time=line.match(/^([🍺🍽️🍸]?\s*\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?)\s*(.*)$/);
-    if(time){ push(); current={type:"time",title:time[1].trim(),lines:[]}; if(time[2]) current.lines.push(time[2]); continue; }
+    if(time){ push(); current={type:"time",title:time[1].trim(),lines:[]}; lastNamed=current.title; if(time[2]) current.lines.push(time[2]); continue; }
 
-    if(isHeading(line)){ push(); current={type:"section",title:line,lines:[]}; continue; }
+    if(isHeading(line)){ startSection(line); continue; }
 
-    // Recognize common named places as their own block when followed by URL or notes
-    if(isPlaceName(line) && (!current || current.title==="Notas" || current.lines.length>0)){
-      push();
-      current={type:"section",title:placeIcon(line)+" "+line,lines:[]};
+    if(isPlaceName(line)){
+      // If current is generic or already has unrelated content, create a named section.
+      if(!current || current.title==="Notas" || current.lines.length>0) startSection(placeIcon(line)+" "+line);
+      else current.lines.push(line);
+      lastNamed=placeIcon(line)+" "+line;
       continue;
     }
 
-    if(!current) current={type:"section",title:"Notas",lines:[]};
+    ensureSection("Notas");
     current.lines.push(line);
   }
   push();
   return d;
 }
 function isPlaceName(line){
-  if(line.length>48) return false;
-  if(/^✔|^✓/.test(line)) return false;
+  if(line.length>58) return false;
+  if(/^✔|^✓|^✅/.test(line)) return false;
   if(/https?:\/\//.test(line)) return false;
   return /(Parking|Plaza de Cuba|Mercado de Triana|Obispo Galarza|María Trifulca|Maria Trifulca|Bar Embarcadero|Calle Betis|Capilla|Cristo|Triana 143|Casa Juan|Cuartel del Mar|Mercadona|Chiringuito|Restaurante)/i.test(line);
 }
 function placeIcon(line){
-  if(/parking|plaza de cuba|obispo/i.test(line)) return "🅿️";
+  if(/parking|plaza de cuba|obispo|mercado de triana/i.test(line)) return "🅿️";
   if(/trifulca|bar|casa juan|cuartel|restaurante|chiringuito|mercadona/i.test(line)) return "🍽️";
   if(/capilla|cristo|visita/i.test(line)) return "⛪";
   if(/triana 143|hotel|alojamiento/i.test(line)) return "🏨";
@@ -143,36 +142,15 @@ function placeIcon(line){
 }
 function isHeading(line){
   if(line.length>55) return false;
-  return /^(🏨|🅿️|⛪|🍺|🍽️|🍸|🚶|📅|📍|🏖|🚗|📝)/.test(line) || /^(Alojamiento|Parking|Visita|Cena|Cerveza|Copa|Vuelta|Plan del día|Playas|Restaurantes|Distancias|Transporte|CÁCERES|SEVILLA|CACERES)$/i.test(line);
+  return /^(🏨|🅿️|⛪|🍺|🍽️|🍸|🚶|📅|📍|🏖|🚗|📝)/.test(line) || /^(Alojamiento|Parking|Visita|Cena|Cerveza|Copa|Vuelta|Plan del día|Playas|Restaurantes|Distancias|Transporte|CÁCERES|CACERES|SEVILLA)$/i.test(line);
 }
 function iconForDay(d){let x=norm(d.title+" "+d.raw);if(/parking|distancia|coche|tren|aeropuerto/.test(x))return"🚗";if(/restaurante|cena|comida|bar|cerveza|copa|trifulca|casa juan/.test(x))return"🍽";if(/hotel|alojamiento|chalet/.test(x))return"🏨";return"📅"}
 function extractLinks(text){
-  let out=[]; let urlRe=/https?:\/\/[^\s]+/g; let m;
-  while((m=urlRe.exec(clean(text)))!==null){out.push({label:m[0].includes("maps")||m[0].includes("google")?"Abrir Maps":"Abrir enlace",url:m[0]})}
+  let out=[], urlRe=/https?:\/\/[^\s]+/g, m;
+  while((m=urlRe.exec(clean(text)))!==null){out.push({label:isMap(m[0])?"Abrir Maps":"Abrir enlace",url:m[0]})}
   return out;
 }
 function allLinks(t){let arr=[];t.days.forEach(d=>d.links.forEach(l=>arr.push(l)));return arr}
-
-function parseDay(raw){
-  raw=clean(raw).trim();
-  let lines=raw.split("\n").map(x=>x.trim()).filter(Boolean);
-  let title=lines[0]?.replace(/^---+|---+$/g,"").trim()||"Día";
-  if(lines[1] && norm(lines[1])===norm(title)) lines.splice(1,1);
-  let d={id:uid(),title,raw,sections:[],links:extractLinks(raw)};
-  let current=null;
-  function push(){ if(current && current.lines.length) d.sections.push(current); current=null; }
-  for(let i=1;i<lines.length;i++){
-    let line=lines[i];
-    if(/^[-—_⸻]{2,}$/.test(line)){ push(); continue; }
-    let time=line.match(/^([🍺🍽️🍸]?\s*\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?)\s*(.*)$/);
-    if(time){ push(); current={type:"time",title:time[1].trim(),lines:[]}; if(time[2]) current.lines.push(time[2]); continue; }
-    if(isHeading(line)){ push(); current={type:"section",title:line,lines:[]}; continue; }
-    if(!current) current={type:"section",title:"Notas",lines:[]};
-    current.lines.push(line);
-  }
-  push();
-  return d;
-}
 
 function tripForm(id=""){
   let t=id?db.trips.find(x=>x.id===id):{};
@@ -180,16 +158,11 @@ function tripForm(id=""){
 }
 function saveTrip(id=""){let t=id?db.trips.find(x=>x.id===id):{id:uid(),days:[]};Object.assign(t,{name:fName.value.trim(),dates:fDates.value.trim(),destination:fDest.value.trim(),people:fPeople.value.trim(),hotel:fHotel.value.trim(),hotelMap:fHotelMap.value.trim(),image:fImage.value.trim(),summary:fSummary.value.trim()});if(!id){db.trips.push(t);activeTripId=t.id}save();closeModal();render()}
 function deleteTrip(id){if(confirm("¿Eliminar viaje?")){db.trips=db.trips.filter(t=>t.id!==id);activeTripId=db.trips[0]?.id||null;save();render()}}
-function dayForm(){modal("Añadir día desde Apple Notes",`<p class="tip">Copia una nota completa desde Apple Notes y pégala aquí. Esta versión detecta bloques por emojis y horarios.</p><textarea id="dayRaw" placeholder="Pega aquí la nota completa"></textarea><button class="primary" onclick="saveDay()">Guardar día</button>`)}
+function dayForm(){modal("Añadir día desde Apple Notes",`<p class="tip">Copia una nota completa desde Apple Notes y pégala aquí.</p><textarea id="dayRaw" placeholder="Pega aquí la nota completa"></textarea><button class="primary" onclick="saveDay()">Guardar día</button>`)}
 function saveDay(){let raw=clean(dayRaw.value).trim();if(!raw)return alert("Pega la nota");trip().days.push(parseDay(raw));save();closeModal();tab="days";render()}
 function folderImport(){modal("Importar varios días/notas",`<p class="tip">Pega varias notas juntas separadas por títulos con guiones.</p><div class="sample">--- Martes 14 julio ---\ncontenido...\n\n--- VIAJE CONIL - 15 JULIO - CHALET ---\ncontenido...</div><textarea id="bulk" placeholder="Pega aquí varias notas"></textarea><button class="primary" onclick="saveFolder()">Importar</button>`)}
 function saveFolder(){let raw=clean(bulk.value).trim();if(!raw)return alert("Pega contenido");splitNotes(raw).forEach(r=>trip().days.push(parseDay(r)));save();closeModal();tab="days";render();alert("Importado")}
-function splitNotes(raw){
-  raw=clean(raw);
-  let parts=raw.split(/\n\s*---+\s*/).map(x=>x.trim()).filter(Boolean);
-  if(parts.length>1)return parts.map(p=>p.startsWith("---")?p:"--- "+p);
-  return [raw];
-}
+function splitNotes(raw){raw=clean(raw);let parts=raw.split(/\n\s*---+\s*/).map(x=>x.trim()).filter(Boolean);if(parts.length>1)return parts.map(p=>p.startsWith("---")?p:"--- "+p);return [raw]}
 function copyDay(id){let d=trip().days.find(x=>x.id===id);navigator.clipboard.writeText(d.raw)}
 function deleteDay(id){if(confirm("¿Eliminar día?")){trip().days=trip().days.filter(d=>d.id!==id);save();render()}}
 
