@@ -1,1 +1,61 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Viajes & Planes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.svg"><link rel="stylesheet" href="styles.css"><title>Viajes & Planes</title></head><body><header><button id="menu">☰</button><b id="title">Viajes & Planes</b><button id="dark">☾</button></header><div id="shade"></div><aside id="side"><h1>🧭 Viajes & Planes <button id="x">×</button></h1><button data-view="home">🏠 Inicio</button><button data-view="trips">✈️ Viajes</button><button data-view="events">🎟️ Eventos</button><button data-view="reservations">📧 Reservas</button><button data-view="docs">📂 Docs</button><hr><button id="newTrip">+ Nuevo viaje</button><button id="newEvent">+ Nuevo evento</button><button id="newRes">+ Nueva reserva</button></aside><main id="app"></main><nav><button data-view="home">🏠<small>Inicio</small></button><button data-view="trips">✈️<small>Viajes</small></button><button data-view="events">🎟️<small>Eventos</small></button><button data-view="reservations">📧<small>Reservas</small></button><button data-view="docs">📂<small>Docs</small></button></nav><div id="modal"><section><h2><span id="mt"></span><button id="mx">×</button></h2><div id="mb"></div></section></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Viajes & Planes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <title>Viajes & Planes</title>
+</head>
+<body>
+<header class="top">
+  <button id="menuBtn" class="circle">☰</button>
+  <strong id="screenTitle">Viajes & Planes</strong>
+  <button id="darkBtn" class="circle">☾</button>
+</header>
+
+<div id="shade" class="shade"></div>
+
+<aside id="side" class="side">
+  <div class="sideHead">
+    <h1>🧭 Viajes & Planes</h1>
+    <button id="closeSide" class="circle light">×</button>
+  </div>
+  <button data-view="home">🏠 Inicio</button>
+  <button data-view="trips">✈️ Viajes</button>
+  <button data-view="events">🎟️ Eventos</button>
+  <button data-view="reservations">📧 Reservas</button>
+  <button data-view="docs">📂 Documentos</button>
+  <hr>
+  <button id="addTrip">+ Nuevo viaje</button>
+  <button id="addEvent">+ Nuevo evento</button>
+  <button id="addReservation">+ Nueva reserva</button>
+</aside>
+
+<main id="app"></main>
+
+<nav class="bottom">
+  <button data-view="home">🏠<span>Inicio</span></button>
+  <button data-view="trips">✈️<span>Viajes</span></button>
+  <button data-view="events">🎟️<span>Eventos</span></button>
+  <button data-view="reservations">📧<span>Reservas</span></button>
+  <button data-view="docs">📂<span>Docs</span></button>
+</nav>
+
+<div id="modal" class="modal">
+  <section class="modalBox">
+    <div class="modalHead">
+      <h2 id="modalTitle"></h2>
+      <button id="closeModal" class="circle">×</button>
+    </div>
+    <div id="modalBody"></div>
+  </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,1 +1,15 @@
-{"name":"Viajes & Planes","short_name":"Viajes","start_url":"./index.html","display":"standalone","background_color":"#f4f6fb","theme_color":"#2563eb","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml"}]}
+{
+  "name": "Viajes & Planes",
+  "short_name": "Viajes",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
