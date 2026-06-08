@@ -34,7 +34,7 @@ function countdown(dateStr){
 }
 menuBtn.onclick=()=>{side.classList.add("open");shade.classList.add("show")};closeSide.onclick=shade.onclick=()=>{side.classList.remove("open");shade.classList.remove("show")};closeModal.onclick=()=>modal.classList.remove("show");darkBtn.onclick=()=>document.body.classList.toggle("dark");addTrip.onclick=()=>tripForm();addEvent.onclick=()=>eventForm();addReservation.onclick=()=>reservationForm();addDoc.onclick=()=>docForm();document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{view=b.dataset.view;side.classList.remove("open");shade.classList.remove("show");render()});function showModal(t,h){modalTitle.textContent=t;modalBody.innerHTML=h;modal.classList.add("show")}
 function render(){document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));screenTitle.textContent={home:"Inicio",trips:"Viajes",events:"Eventos",reservations:"Reservas",docs:"Documentos",sync:"Exportar / Importar"}[view];if(view==="home")home();if(view==="trips")trips();if(view==="events")events();if(view==="reservations")reservations();if(view==="docs")docs();if(view==="sync")syncView()}
-function home(){app.innerHTML=`<section class=hero><div class=txt><h1>Viajes & Plans 6</h1><p>Portadas + enlaces Maps generados desde Apple Notes</p></div></section><div class=grid><div class=stat><span>${db.trips.length}</span>Viajes</div><div class=stat><span>${db.events.length}</span>Eventos</div><div class=stat><span>${db.reservations.length}</span>Reservas</div><div class=stat><span>${db.docs.length}</span>Docs</div></div><div class=card><h2>Próximos viajes</h2>${db.trips.map(t=>`<p><b>${esc(t.name)}</b><br><span class=muted>${esc(t.dates)} ${countdown(t.startDate)?'· '+countdown(t.startDate):''}</span></p>`).join("")||"<p class=muted>Sin viajes.</p>"}</div><div class=card><h2>Acciones rápidas</h2><button class=primary onclick=tripForm()>+ Viaje</button><button class=primary onclick=eventForm()>+ Evento</button><button class=primary onclick=reservationForm()>+ Reserva</button><button class=primary onclick=docForm()>+ Documento</button><button class=secondary onclick="view='sync';render()">Exportar / importar datos</button></div>`}
+function home(){app.innerHTML=`<section class=hero><div class=txt><h1>Viajes & Plans 7</h1><p>V7: cuenta atrás + Maps de Apple Notes mejorados</p></div></section><div class=grid><div class=stat><span>${db.trips.length}</span>Viajes</div><div class=stat><span>${db.events.length}</span>Eventos</div><div class=stat><span>${db.reservations.length}</span>Reservas</div><div class=stat><span>${db.docs.length}</span>Docs</div></div><div class=card><h2>Próximos viajes</h2>${db.trips.map(t=>`<p><b>${esc(t.name)}</b><br><span class=muted>${esc(t.dates)} ${countdown(t.startDate||t.dates)?'· '+countdown(t.startDate||t.dates):''}</span></p>`).join("")||"<p class=muted>Sin viajes.</p>"}</div><div class=card><h2>Acciones rápidas</h2><button class=primary onclick=tripForm()>+ Viaje</button><button class=primary onclick=eventForm()>+ Evento</button><button class=primary onclick=reservationForm()>+ Reserva</button><button class=primary onclick=docForm()>+ Documento</button><button class=secondary onclick="view='sync';render()">Exportar / importar datos</button></div>`}
 function linkBox(title,url){return url?`<div class=linkBox><b>🔗 ${esc(title)}</b><br><a class=mapBtn href="${esc(url)}" target=_blank>Abrir</a></div>`:""}
 function activeTrip(){
   if(activeTripId)return db.trips.find(t=>t.id===activeTripId)||null;
@@ -44,21 +44,33 @@ function tripDestination(){
   let t=activeTrip();
   return (t?.destination||t?.name||"").replace(/\d{4}/g,"").trim();
 }
+function cleanPlaceForMaps(q){
+  return String(q||"")
+    .replace(/<[^>]*>/g," ")
+    .replace(/^[\s•\-\d.]+/," ")
+    .replace(/[🇧🇪📍🔗➡️➔→]/g," ")
+    .replace(/\bMaps\b/gi," ")
+    .replace(/\bDirecci[oó]n:?/gi," ")
+    .replace(/\|/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
 function googleMapsSearch(q){
   let dest=tripDestination();
-  let text=(q||"").replace(/^[0-9]+\.\s*/,"").replace(/[📍➡️➔→]/g," ").replace(/\bMaps\b/gi,"").replace(/\s+/g," ").trim();
-  if(dest && !text.toLowerCase().includes(dest.toLowerCase().split(",")[0])) text += " " + dest;
+  let text=cleanPlaceForMaps(q);
+  if(dest && !text.toLowerCase().includes(dest.toLowerCase().split(",")[0].trim())) text += " " + dest;
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(text);
 }
 function linkify(txt){
   txt = txt.replace(/https?:\/\/[^\s<]+/g,u=>`<a target=_blank href="${u}">${u.includes("maps")||u.includes("google")?"Abrir Maps":"Abrir enlace"}</a>`);
-  txt = txt.replace(/^(.{2,80}?)(?:\s*[→➔➡]\s*)Maps$/gmi,(m,place)=>`${esc(place)} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
-  txt = txt.replace(/^\s*([0-9]+\.\s*.{2,80}?)(?:\s*[→➔➡]\s*)Maps$/gmi,(m,place)=>`${esc(place)} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
-  txt = txt.replace(/^\s*Maps\s*$/gmi,"");
+  txt = txt.replace(/^(.{2,120})\n\s*Maps\s*$/gmi,(m,place)=>`${place}\n<a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
+  txt = txt.replace(/^(.{2,140}?)(?:\s*[→➔➡|]\s*📍?\s*)Maps\s*$/gmi,(m,place)=>`${place} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
+  txt = txt.replace(/^(\s*\d+\.\s*.{2,120}?[→➔➡])\s*\n\s*Maps\s*$/gmi,(m,place)=>`${place.replace(/[→➔➡]\s*$/,"")} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
+  txt = txt.replace(/^(.{2,140}?)\s+Maps\s*$/gmi,(m,place)=>`${place} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
   return txt;
 }
 function trips(){app.innerHTML=`<div class=card><h2>✈️ Viajes</h2><button class=primary onclick=tripForm()>+ Nuevo viaje</button></div>${db.trips.map(tripCard).join("")||"<div class=empty>Sin viajes.</div>"}`}
-function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate)||"—"}</span>Cuenta atrás</div><div class=stat><span>${esc(t.budget||"—")}</span>Presupuesto</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
+function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate||t.dates)||"—"}</span>Cuenta atrás</div><div class=stat><span>${esc(t.budget||"—")}</span>Presupuesto</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
 function tripHero(t){return`<section class=tripHero>${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=overlay></div><div class=txt><h2>${esc(t.name)}</h2><p>${esc(t.dates)}</p><p>${esc(t.destination)}</p></div></section>`}
 function noteCard(n,tid){return`<div class=noteCard><button class=noteHead onclick="this.parentElement.classList.toggle('open')"><span>📒</span><strong>${esc(n.title)}</strong><span>⌄</span></button><div class=noteBody><div class=noteText>${linkify(esc(n.body))}</div><div class=actions><button class=secondary onclick="noteForm('${tid}','${n.id}')">Editar</button><button class=danger onclick="deleteNote('${tid}','${n.id}')">Eliminar</button></div></div></div>`}
 function events(){app.innerHTML=`<div class=card><h2>🎟️ Eventos</h2><button class=primary onclick=eventForm()>+ Nuevo evento</button></div>${db.events.map(e=>`<div class=card><h2>${esc(e.name)}</h2><p class=muted>${esc(e.type)} · ${esc(e.date)} · ${esc(e.place)}</p>${linkBox("Entrada / documento",e.docLink)}${e.map?`<p><a class=mapBtn target=_blank href="${mapLink(e.map)}">Abrir Maps</a></p>`:""}<p>${esc(e.notes||"")}</p><div class=actions><button class=secondary onclick="eventForm('${e.id}')">Editar</button><button class=danger onclick="del('events','${e.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin eventos.</div>"}`}
