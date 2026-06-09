@@ -43,9 +43,25 @@ async function updateWeatherCards(){
     let t=db.trips.find(x=>x.id===el.dataset.weatherTrip);
     let w=await fetchWeather(t);
     if(!w){el.innerHTML="<span>—</span>Tiempo";continue;}
-    el.innerHTML=`<span>${weatherIcon(w.code)} ${w.temp}°</span>${w.city}<br><small>${weatherText(w.code)}</small>`;
+    el.innerHTML=`<span>${weatherIcon(w.code)} ${w.temp}°</span>${w.city}<br><small>${weatherText(w.code)}</small>`; el.classList.add("weather-click"); el.onclick=()=>showWeatherDetail(t,w);
   }
 }
+function showWeatherDetail(t,w){
+  if(!w)return;
+  let days=w.days||{};
+  let html=`<h3>${weatherIcon(w.code)} ${w.city}</h3><p><b>${w.temp}°</b> · ${weatherText(w.code)}</p><div class=weatherDetail>`;
+  for(let i=0;i<Math.min(3,(days.time||[]).length);i++){
+    let label=i===0?"Hoy":(i===1?"Mañana":"Pasado mañana");
+    let code=days.weather_code?.[i];
+    let max=Math.round(days.temperature_2m_max?.[i]);
+    let min=Math.round(days.temperature_2m_min?.[i]);
+    let rain=days.precipitation_probability_max?.[i];
+    html+=`<div class=weatherDay><b>${label}</b><span>${weatherIcon(code)} ${weatherText(code)}</span><span>Máx ${max}° · Mín ${min}° · Lluvia ${rain ?? 0}%</span></div>`;
+  }
+  html+=`</div><p class=muted>Se actualiza automáticamente al abrir la app.</p>`;
+  showModal("Tiempo del destino",html);
+}
+
 
 function parseTripDate(s){
   s=String(s||"").trim();
@@ -83,7 +99,7 @@ menuBtn.onclick=()=>{side.classList.add("open");shade.classList.add("show")};clo
 function render(){if(activeTripId && !byId(db.trips,activeTripId))activeTripId=null;document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));screenTitle.textContent={home:"Inicio",trips:"Viajes",events:"Eventos",reservations:"Reservas",docs:"Documentos",sync:"Exportar / Importar"}[view];if(view==="home")home();if(view==="trips")trips();if(view==="events")events();if(view==="reservations")reservations();if(view==="docs")docs();if(view==="sync")syncView(); setTimeout(updateWeatherCards,50)}
 function home(){
   let next=db.trips[0];
-  app.innerHTML=`${next?homeHero(next):`<section class=hero><div class=txt><h1>Viajes & Plans 14</h1><p>V14 Final</p></div></section>`}
+  app.innerHTML=`${next?homeHero(next):`<section class=hero><div class=txt><h1>Viajes & Plans 14 Stable</h1><p>V14 Stable Final</p></div></section>`}
   <div class=grid><div class=stat><span>${db.trips.length}</span>Viajes</div><div class=stat><span>${db.events.length}</span>Eventos</div><div class=stat><span>${db.reservations.length}</span>Reservas</div><div class=stat><span>${db.docs.length}</span>Docs</div></div>
   <div class=card><h2>Próximos viajes</h2>${db.trips.map(t=>homeTripCard(t)).join("")||"<p class=muted>Sin viajes.</p>"}</div>
   <div class=card><h2>Acciones rápidas</h2><button class=primary onclick=tripForm()>+ Viaje</button><button class=primary onclick=eventForm()>+ Evento</button><button class=primary onclick=reservationForm()>+ Reserva</button><button class=primary onclick=docForm()>+ Documento</button><button class=secondary onclick="view='sync';render()">Exportar / importar datos</button></div>`;
@@ -190,7 +206,7 @@ function trips(){
   app.innerHTML=`<div class=card><h2>✈️ Viajes</h2><button class=primary onclick=tripForm()>+ Nuevo viaje</button></div>${ordered.map(tripCard).join("")||"<div class=empty>Sin viajes.</div>"}`;
   setTimeout(updateWeatherCards,50);
 }
-function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate||t.dates)||"—"}</span>Cuenta atrás</div><div class=stat data-weather-trip="${t.id}"><span>…</span>Tiempo</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="shareTripText('${t.id}')">Compartir</button><button class=secondary onclick="shareTripText('${t.id}')">Compartir</button><button class=secondary onclick="exportTrip('${t.id}')">Exportar viaje</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
+function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate||t.dates)||"—"}</span>Cuenta atrás</div><div class=stat data-weather-trip="${t.id}"><span>…</span>Tiempo</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="shareTripText('${t.id}')">Compartir</button><button class=secondary onclick="exportTrip('${t.id}')">Exportar viaje</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
 function tripHero(t){return`<section class=tripHero>${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=overlay></div><div class=txt><h2>${esc(t.name)}</h2><p>${esc(t.dates)}</p><p>${esc(t.destination)}</p></div></section>`}
 function noteCard(n,tid){return`<div class=noteCard><button class=noteHead onclick="this.parentElement.classList.toggle('open')"><span>📒</span><strong>${esc(n.title)}</strong><span>⌄</span></button><div class=noteBody><div class=noteText>${noteMaps(esc(n.body))}</div><div class=actions><button class=secondary onclick="noteForm('${tid}','${n.id}')">Editar</button><button class=danger onclick="deleteNote('${tid}','${n.id}')">Eliminar</button></div></div></div>`}
 function events(){app.innerHTML=`<div class=card><h2>🎟️ Eventos</h2><button class=primary onclick=eventForm()>+ Nuevo evento</button></div>${db.events.map(e=>`<div class=card>${e.image?`<div class=visualCard><img src="${esc(e.image)}"><div class=vtxt><h2>${esc(e.name)}</h2><p>${esc(e.date)} · ${esc(e.place)}</p></div></div>`:`<h2>${esc(e.name)}</h2>`}<p class=muted>${esc(e.type)} · ${esc(e.date)} · ${esc(e.place)}</p>${linkBox("Entrada / documento",e.docLink)}${e.map?`<p><a class=mapBtn target=_blank href="${mapLink(e.map)}">Abrir Maps</a></p>`:""}<p>${esc(e.notes||"")}</p><div class=actions><button class=secondary onclick="eventForm('${e.id}')">Editar</button><button class=danger onclick="del('events','${e.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin eventos.</div>"}`}
@@ -225,7 +241,7 @@ function shareTripText(id){
   let text=`${t.name}\n${t.dates}\n${t.destination}\n\n${t.summary||""}\n\nHotel: ${t.hotel||""}\n\n${(t.notes||[]).map(n=>"--- "+n.title+" ---\n"+n.body).join("\n\n")}`;
   showModal("Compartir viaje",`<p class=muted>Copia este texto o exporta el JSON para otro móvil.</p><div class=shareBox>${esc(text)}</div><button class=primary onclick="navigator.clipboard.writeText(document.querySelector('.shareBox').innerText)">Copiar texto</button><button class=secondary onclick="exportTrip('${id}')">Exportar viaje JSON</button>`);
 }
-function del(c,id){if(confirm("¿Eliminar?")){db[c]=db[c].filter(x=>x.id!==id);save();render()}}function syncView(){app.innerHTML=`<div class=card><h2>🔄 Exportar / Importar</h2><p class=muted>Copia completa y viajes compartidos.</p><button class=primary onclick=exportAll()>Exportar todo</button><label>Importar copia completa JSON</label><input id=importFile type=file accept="application/json"><button class=primary onclick=importAll()>Importar copia completa</button><hr><label>Importar viaje compartido</label><input id=tripImportFile type=file accept="application/json"><button class=secondary onclick=importTripFile()>Importar viaje</button><p class=muted>Versión V14 Final</p></div>`}
+function del(c,id){if(confirm("¿Eliminar?")){db[c]=db[c].filter(x=>x.id!==id);save();render()}}function syncView(){app.innerHTML=`<div class=card><h2>🔄 Exportar / Importar</h2><p class=muted>Copia completa y viajes compartidos.</p><button class=primary onclick=exportAll()>Exportar todo</button><label>Importar copia completa JSON</label><input id=importFile type=file accept="application/json"><button class=primary onclick=importAll()>Importar copia completa</button><hr><label>Importar viaje compartido</label><input id=tripImportFile type=file accept="application/json"><button class=secondary onclick=importTripFile()>Importar viaje</button><p class=muted>Versión V14 Stable Final</p></div>`}
 function exportAll(){dl("viajes-plans-backup.json",JSON.stringify(db,null,2))}function importAll(){let f=importFile.files[0];if(!f)return alert("Elige el JSON");let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert("Importado");view="home";render()}catch(e){alert("Archivo no válido")}};r.readAsText(f)}render();
 
 document.addEventListener("click",e=>{

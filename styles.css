@@ -16,3 +16,17 @@
 
 .shareBox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0;max-height:360px;overflow:auto}
 .autoMap{display:inline-block;background:var(--soft);color:var(--accent);padding:7px 10px;border-radius:12px;margin:4px 0;font-weight:900}
+
+.weatherDetail{display:grid;gap:10px;margin-top:10px}
+.weatherDay{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:12px}
+.weatherDay b{font-size:18px}
+.weatherDay span{display:block;color:var(--muted);margin-top:4px}
+
+/* V14 Stable Final fixes */
+.side{overflow-y:auto}
+.sideHead{position:relative}
+.sideHead::before,.sideHead::after,.side::before,.side::after{display:none!important;content:none!important}
+.sideHead input,.sideHead .search,.sideHead .avatar,.sideHead .profile,.sideHead .pill,.sideHead form{display:none!important}
+.sideHead > *:empty{display:none!important}
+.sideHead .circle{flex:0 0 auto}
+.weather-click{cursor:pointer}
