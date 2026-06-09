@@ -78,7 +78,7 @@ menuBtn.onclick=()=>{side.classList.add("open");shade.classList.add("show")};clo
 function render(){document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));screenTitle.textContent={home:"Inicio",trips:"Viajes",events:"Eventos",reservations:"Reservas",docs:"Documentos",sync:"Exportar / Importar"}[view];if(view==="home")home();if(view==="trips")trips();if(view==="events")events();if(view==="reservations")reservations();if(view==="docs")docs();if(view==="sync")syncView(); setTimeout(updateWeatherCards,50)}
 function home(){
   let next=db.trips[0];
-  app.innerHTML=`${next?homeHero(next):`<section class=hero><div class=txt><h1>Viajes & Plans 11</h1><p>Versión estable</p></div></section>`}
+  app.innerHTML=`${next?homeHero(next):`<section class=hero><div class=txt><h1>Viajes & Plans 12</h1><p>V12: Maps individuales en notas</p></div></section>`}
   <div class=grid><div class=stat><span>${db.trips.length}</span>Viajes</div><div class=stat><span>${db.events.length}</span>Eventos</div><div class=stat><span>${db.reservations.length}</span>Reservas</div><div class=stat><span>${db.docs.length}</span>Docs</div></div>
   <div class=card><h2>Próximos viajes</h2>${db.trips.map(t=>homeTripCard(t)).join("")||"<p class=muted>Sin viajes.</p>"}</div>
   <div class=card><h2>Acciones rápidas</h2><button class=primary onclick=tripForm()>+ Viaje</button><button class=primary onclick=eventForm()>+ Evento</button><button class=primary onclick=reservationForm()>+ Reserva</button><button class=primary onclick=docForm()>+ Documento</button><button class=secondary onclick="view='sync';render()">Exportar / importar datos</button></div>`;
@@ -120,7 +120,7 @@ function googleMapsSearch(q){
 function linkify(txt){
   txt = txt.replace(/https?:\/\/[^\s<]+/g,u=>`<a target=_blank href="${u}">${u.includes("maps")||u.includes("google")?"Abrir Maps":"Abrir enlace"}</a>`);
 
-  txt = txt.replace(/^\s*[•\-]?\s*📍\s*(.{2,120})$/gmi,(m,place)=>{
+  txt = txt.replace(/^\s*[•\-]?\s*📍\s*(.{2,120})$/gmi,(m,place)=>{ if(/PUNTOS CLAVE|MAPS/i.test(place)) return m;
     let p=place.trim();
     return `📍 ${p}<br><a class=mapBtn target=_blank href="${googleMapsSearch(p)}">Abrir Maps</a>`;
   });
@@ -128,13 +128,57 @@ function linkify(txt){
   txt = txt.replace(/^(.{2,120})\n\s*Maps\s*$/gmi,(m,place)=>`${place}\n<a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
   txt = txt.replace(/^(.{2,140}?)(?:\s*[→➔➡|]\s*📍?\s*)Maps\s*$/gmi,(m,place)=>`${place} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
   txt = txt.replace(/^(\s*\d+\.\s*.{2,120}?[→➔➡])\s*\n\s*Maps\s*$/gmi,(m,place)=>`${place.replace(/[→➔➡]\s*$/,"")} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
-  txt = txt.replace(/^(.{2,140}?)\s+Maps\s*$/gmi,(m,place)=>`${place} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
+  txt = txt.replace(/^(.{2,140}?)\s+Maps\s*$/gmi,(m,place)=>/PUNTOS CLAVE|ENLACES|OPCIONES/i.test(place)?m:`${place} <a class=mapBtn target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
   return txt;
+}
+
+function shouldAutoMapLine(line){
+  let p=String(line||"").trim();
+  if(!p)return false;
+  if(p.includes("<a ")||p.includes("http")||p.includes("Abrir Maps"))return false;
+  if(/^(Mañana|Tarde|Noche|Tips?|TIPS PRO|Resumen|Cronograma|Logística|Enlaces Útiles|Puntos Clave|PUNTOS CLAVE|Opciones|OPCIONES|Recomendación|Dirección|Todo a pie)/i.test(p))return false;
+  if(/^[•\-\s]*\d{1,2}[:.]\d{2}/.test(p))return false;
+  if(/^[0-9:–\-| ]+$/.test(p))return false;
+  // numbered place lines: "1. Peck 47 (Desayuno)"
+  if(/^\d+\.\s*.{2,90}$/.test(p))return true;
+  // pin lines
+  if(/^📍\s*.{2,90}$/.test(p))return true;
+  // common proper place patterns
+  if(/\b(Peck|Grand Place|Manneken|Galeries|Catedral|Frites|Nuetnigenough|Sablon|Palacio|Mont des Arts|Maison|Moeder|Noordzee|Bruxelles|Central|Aeropuerto|Dandoy|Lambic|Siècle|Leon|Léon)\b/i.test(p))return true;
+  return false;
+}
+function placeText(line){
+  return String(line||"")
+    .replace(/^\s*[•\-]?\s*/,"")
+    .replace(/^\d+\.\s*/,"")
+    .replace(/^📍\s*/,"")
+    .replace(/\s*[→➔➡]\s*Maps\s*$/i,"")
+    .replace(/\s+Maps\s*$/i,"")
+    .trim();
+}
+function formatNoteText(rawHtml){
+  let text=rawHtml;
+  // first keep real URLs and Apple Notes Maps patterns from linkify
+  text=linkify(text);
+
+  // Now add individual Maps buttons to list/place lines.
+  let lines=text.split("\\n");
+  let out=[];
+  for(let line of lines){
+    let plain=line.replace(/<[^>]+>/g,"").trim();
+    if(shouldAutoMapLine(line)){
+      let p=placeText(plain);
+      out.push(`${line}<br><a class="autoMap" target="_blank" href="${googleMapsSearch(p)}">Abrir Maps</a>`);
+    }else{
+      out.push(line);
+    }
+  }
+  return out.join("\\n");
 }
 function trips(){app.innerHTML=`<div class=card><h2>✈️ Viajes</h2><button class=primary onclick=tripForm()>+ Nuevo viaje</button></div>${db.trips.map(tripCard).join("")||"<div class=empty>Sin viajes.</div>"}`}
 function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate||t.dates)||"—"}</span>Cuenta atrás</div><div class=stat data-weather-trip="${t.id}"><span>…</span>Tiempo</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="shareTrip('${t.id}')">Compartir</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
 function tripHero(t){return`<section class=tripHero>${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=overlay></div><div class=txt><h2>${esc(t.name)}</h2><p>${esc(t.dates)}</p><p>${esc(t.destination)}</p></div></section>`}
-function noteCard(n,tid){return`<div class=noteCard><button class=noteHead onclick="this.parentElement.classList.toggle('open')"><span>📒</span><strong>${esc(n.title)}</strong><span>⌄</span></button><div class=noteBody><div class=noteText>${linkify(esc(n.body))}</div><div class=actions><button class=secondary onclick="noteForm('${tid}','${n.id}')">Editar</button><button class=danger onclick="deleteNote('${tid}','${n.id}')">Eliminar</button></div></div></div>`}
+function noteCard(n,tid){return`<div class=noteCard><button class=noteHead onclick="this.parentElement.classList.toggle('open')"><span>📒</span><strong>${esc(n.title)}</strong><span>⌄</span></button><div class=noteBody><div class=noteText>${formatNoteText(esc(n.body))}</div><div class=actions><button class=secondary onclick="noteForm('${tid}','${n.id}')">Editar</button><button class=danger onclick="deleteNote('${tid}','${n.id}')">Eliminar</button></div></div></div>`}
 function events(){app.innerHTML=`<div class=card><h2>🎟️ Eventos</h2><button class=primary onclick=eventForm()>+ Nuevo evento</button></div>${db.events.map(e=>`<div class=card>${e.image?`<div class=visualCard><img src="${esc(e.image)}"><div class=vtxt><h2>${esc(e.name)}</h2><p>${esc(e.date)} · ${esc(e.place)}</p></div></div>`:`<h2>${esc(e.name)}</h2>`}<p class=muted>${esc(e.type)} · ${esc(e.date)} · ${esc(e.place)}</p>${linkBox("Entrada / documento",e.docLink)}${e.map?`<p><a class=mapBtn target=_blank href="${mapLink(e.map)}">Abrir Maps</a></p>`:""}<p>${esc(e.notes||"")}</p><div class=actions><button class=secondary onclick="eventForm('${e.id}')">Editar</button><button class=danger onclick="del('events','${e.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin eventos.</div>"}`}
 function reservations(){app.innerHTML=`<div class=card><h2>📧 Reservas</h2><button class=primary onclick=reservationForm()>+ Nueva reserva</button></div>${db.reservations.map(r=>`<div class=card>${r.image?`<div class=visualCard><img src="${esc(r.image)}"><div class=vtxt><h2>${esc(r.name)}</h2><p>${esc(r.type)} · ${esc(r.date)}</p></div></div>`:`<h2>${esc(r.name)}</h2>`}<p class=muted>${esc(r.type)} · ${esc(r.date)}</p>${r.locator?`<p><b>Localizador:</b> ${esc(r.locator)}</p>`:""}${r.address?`<p><a class=mapBtn target=_blank href="${mapLink(r.address)}">Abrir Maps</a></p>`:""}${linkBox("PDF / documento reserva",r.docLink)}<details><summary><b>Email / texto original</b></summary><div class=noteText>${linkify(esc(r.raw||""))}</div></details><div class=actions><button class=secondary onclick="reservationForm('${r.id}')">Editar</button><button class=danger onclick="del('reservations','${r.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin reservas.</div>"}`}
 function docs(){app.innerHTML=`<div class=card><h2>📂 Documentos</h2><button class=primary onclick=docForm()>+ Añadir documento</button></div>${db.docs.map(d=>`<div class=card><h2>${esc(d.name)}</h2><p class=muted>${esc(d.type)}</p>${linkBox("Abrir documento",d.link)}<p>${esc(d.notes||"")}</p><div class=actions><button class=secondary onclick="docForm('${d.id}')">Editar</button><button class=danger onclick="del('docs','${d.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin documentos.</div>"}`}
