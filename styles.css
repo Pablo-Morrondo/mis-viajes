@@ -8,3 +8,11 @@
 .shareBox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0}
 
 .autoMap{display:inline-block;background:var(--soft);color:var(--accent);padding:7px 10px;border-radius:12px;margin:4px 0;font-weight:900}
+
+.side{overflow-y:auto}
+.side:before,.side:after{display:none!important;content:none!important}
+.side input,.side .search,.side .avatar{display:none!important}
+.visualCard{touch-action:manipulation}
+
+.shareBox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0;max-height:360px;overflow:auto}
+.autoMap{display:inline-block;background:var(--soft);color:var(--accent);padding:7px 10px;border-radius:12px;margin:4px 0;font-weight:900}

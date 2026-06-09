@@ -1,4 +1,9 @@
-const KEY="viajes_plans_4_data";let db=load(),view="home",activeTripId=null;const $=id=>document.getElementById(id);
+const KEY="viajes_plans_4_data";let db=load(),view="home",activeTripId=sessionStorage.getItem("activeTripId")||null;const $=id=>document.getElementById(id);
+function byId(arr,id){return (arr||[]).find(x=>String(x.id)===String(id))||null}
+function setActiveTrip(id){activeTripId=String(id||""); sessionStorage.setItem("activeTripId",activeTripId)}
+function getActiveTrip(){return byId(db.trips,activeTripId)||db.trips[0]||null}
+function resetScroll(){setTimeout(()=>window.scrollTo({top:0,behavior:"instant"}),30)}
+
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}function clean(s){return String(s||"").replace(/\r\n/g,"\n").replace(/\r/g,"\n").replace(/\\n/g,"\n")}function esc(s){return clean(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function save(){localStorage.setItem(KEY,JSON.stringify(db))}function load(){try{let s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return{trips:[],events:[],reservations:[],docs:[]}}function dl(name,text){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"application/json"}));a.download=name;a.click()}function mapLink(t){let u=String(t||"").match(/https?:\/\/\S+/);return u?u[0]:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t||"")}
 function weatherCity(t){
   let raw=(t?.weatherCity||t?.destination||t?.name||"").toLowerCase();
@@ -75,10 +80,10 @@ function countdown(dateStr){
   return"Ya realizado";
 }
 menuBtn.onclick=()=>{side.classList.add("open");shade.classList.add("show")};closeSide.onclick=shade.onclick=()=>{side.classList.remove("open");shade.classList.remove("show")};closeModal.onclick=()=>modal.classList.remove("show");darkBtn.onclick=()=>document.body.classList.toggle("dark");addTrip.onclick=()=>tripForm();addEvent.onclick=()=>eventForm();addReservation.onclick=()=>reservationForm();addDoc.onclick=()=>docForm();document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{view=b.dataset.view;side.classList.remove("open");shade.classList.remove("show");render()});function showModal(t,h){modalTitle.textContent=t;modalBody.innerHTML=h;modal.classList.add("show")}
-function render(){document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));screenTitle.textContent={home:"Inicio",trips:"Viajes",events:"Eventos",reservations:"Reservas",docs:"Documentos",sync:"Exportar / Importar"}[view];if(view==="home")home();if(view==="trips")trips();if(view==="events")events();if(view==="reservations")reservations();if(view==="docs")docs();if(view==="sync")syncView(); setTimeout(updateWeatherCards,50)}
+function render(){if(activeTripId && !byId(db.trips,activeTripId))activeTripId=null;document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));screenTitle.textContent={home:"Inicio",trips:"Viajes",events:"Eventos",reservations:"Reservas",docs:"Documentos",sync:"Exportar / Importar"}[view];if(view==="home")home();if(view==="trips")trips();if(view==="events")events();if(view==="reservations")reservations();if(view==="docs")docs();if(view==="sync")syncView(); setTimeout(updateWeatherCards,50)}
 function home(){
   let next=db.trips[0];
-  app.innerHTML=`${next?homeHero(next):`<section class=hero><div class=txt><h1>Viajes & Plans 12</h1><p>V12: Maps individuales en notas</p></div></section>`}
+  app.innerHTML=`${next?homeHero(next):`<section class=hero><div class=txt><h1>Viajes & Plans 14</h1><p>V14 Final</p></div></section>`}
   <div class=grid><div class=stat><span>${db.trips.length}</span>Viajes</div><div class=stat><span>${db.events.length}</span>Eventos</div><div class=stat><span>${db.reservations.length}</span>Reservas</div><div class=stat><span>${db.docs.length}</span>Docs</div></div>
   <div class=card><h2>Próximos viajes</h2>${db.trips.map(t=>homeTripCard(t)).join("")||"<p class=muted>Sin viajes.</p>"}</div>
   <div class=card><h2>Acciones rápidas</h2><button class=primary onclick=tripForm()>+ Viaje</button><button class=primary onclick=eventForm()>+ Evento</button><button class=primary onclick=reservationForm()>+ Reserva</button><button class=primary onclick=docForm()>+ Documento</button><button class=secondary onclick="view='sync';render()">Exportar / importar datos</button></div>`;
@@ -88,14 +93,11 @@ function homeHero(t){
   return `<section class="tripHero">${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=overlay></div><div class=txt><h2>${esc(t.name)}</h2><p>${countdown(t.startDate||t.dates)||""}</p><p>${esc(t.destination||"")}</p></div></section>`;
 }
 function homeTripCard(t){
-  return `<div class="visualCard" onclick="openTrip('${t.id}')">${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=vtxt><h2>${esc(t.name)}</h2><p>${esc(t.dates)} ${countdown(t.startDate||t.dates)?'· '+countdown(t.startDate||t.dates):''}</p></div></div>`;
+  return `<div class="visualCard" data-open-trip="${esc(t.id)}">${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=vtxt><h2>${esc(t.name)}</h2><p>${esc(t.dates)} ${countdown(t.startDate||t.dates)?'· '+countdown(t.startDate||t.dates):''}</p></div></div>`;
 }
-function openTrip(id){activeTripId=id;view="trips";render();}
+function openTrip(id){setActiveTrip(id);view="trips";render();resetScroll();}
 function linkBox(title,url){return url?`<div class=linkBox><b>🔗 ${esc(title)}</b><br><a class=mapBtn href="${esc(url)}" target=_blank>Abrir</a></div>`:""}
-function activeTrip(){
-  if(activeTripId)return db.trips.find(t=>t.id===activeTripId)||null;
-  return db.trips[0]||null;
-}
+function activeTrip(){return getActiveTrip();}
 function tripDestination(){
   let t=activeTrip();
   return (t?.destination||t?.name||"").replace(/\d{4}/g,"").trim();
@@ -175,10 +177,22 @@ function formatNoteText(rawHtml){
   }
   return out.join("\\n");
 }
-function trips(){app.innerHTML=`<div class=card><h2>✈️ Viajes</h2><button class=primary onclick=tripForm()>+ Nuevo viaje</button></div>${db.trips.map(tripCard).join("")||"<div class=empty>Sin viajes.</div>"}`}
-function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate||t.dates)||"—"}</span>Cuenta atrás</div><div class=stat data-weather-trip="${t.id}"><span>…</span>Tiempo</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="shareTrip('${t.id}')">Compartir</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
+
+function noteMaps(text){
+  text = text.replace(/https?:\/\/[^\s<]+/g,u=>`<a target=_blank href="${u}">${u.includes("maps")||u.includes("google")?"Abrir Maps":"Abrir enlace"}</a>`);
+  text = text.replace(/^\s*📍\s*(?!PUNTOS|MAPS)(.{2,120})$/gmi,(m,place)=>`📍 ${place}<br><a class=autoMap target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
+  text = text.replace(/^(.{2,140}?)(?:\s*[→➔➡|]\s*📍?\s*)Maps\s*$/gmi,(m,place)=>/PUNTOS CLAVE|ENLACES|OPCIONES/i.test(place)?m:`${place} <a class=autoMap target=_blank href="${googleMapsSearch(place)}">Abrir Maps</a>`);
+  return text;
+}
+function trips(){
+  let selected=getActiveTrip();
+  let ordered=selected ? [selected, ...db.trips.filter(t=>String(t.id)!==String(selected.id))] : db.trips;
+  app.innerHTML=`<div class=card><h2>✈️ Viajes</h2><button class=primary onclick=tripForm()>+ Nuevo viaje</button></div>${ordered.map(tripCard).join("")||"<div class=empty>Sin viajes.</div>"}`;
+  setTimeout(updateWeatherCards,50);
+}
+function tripCard(t){return`<div class=card>${tripHero(t)}<p>${esc(t.summary||"")}</p><div class=grid><div class=stat><span>${countdown(t.startDate||t.dates)||"—"}</span>Cuenta atrás</div><div class=stat data-weather-trip="${t.id}"><span>…</span>Tiempo</div></div><p><b>🏨 Hotel:</b> ${esc(t.hotel||"Sin indicar")}</p>${t.hotelMap?`<p><a class=mapBtn target=_blank href="${mapLink(t.hotelMap)}">Abrir hotel en Maps</a></p>`:""}${linkBox("Carpeta del viaje",t.folderLink)}<span class=pill>${(t.notes||[]).length} notas</span><div class=actions><button class=secondary onclick="activeTripId='${t.id}';noteForm()">+ Nota</button><button class=secondary onclick="shareTripText('${t.id}')">Compartir</button><button class=secondary onclick="shareTripText('${t.id}')">Compartir</button><button class=secondary onclick="exportTrip('${t.id}')">Exportar viaje</button><button class=secondary onclick="tripForm('${t.id}')">Editar</button><button class=danger onclick="del('trips','${t.id}')">Eliminar</button></div>${(t.notes||[]).map(n=>noteCard(n,t.id)).join("")}</div>`}
 function tripHero(t){return`<section class=tripHero>${t.cover?`<img src="${esc(t.cover)}">`:""}<div class=overlay></div><div class=txt><h2>${esc(t.name)}</h2><p>${esc(t.dates)}</p><p>${esc(t.destination)}</p></div></section>`}
-function noteCard(n,tid){return`<div class=noteCard><button class=noteHead onclick="this.parentElement.classList.toggle('open')"><span>📒</span><strong>${esc(n.title)}</strong><span>⌄</span></button><div class=noteBody><div class=noteText>${formatNoteText(esc(n.body))}</div><div class=actions><button class=secondary onclick="noteForm('${tid}','${n.id}')">Editar</button><button class=danger onclick="deleteNote('${tid}','${n.id}')">Eliminar</button></div></div></div>`}
+function noteCard(n,tid){return`<div class=noteCard><button class=noteHead onclick="this.parentElement.classList.toggle('open')"><span>📒</span><strong>${esc(n.title)}</strong><span>⌄</span></button><div class=noteBody><div class=noteText>${noteMaps(esc(n.body))}</div><div class=actions><button class=secondary onclick="noteForm('${tid}','${n.id}')">Editar</button><button class=danger onclick="deleteNote('${tid}','${n.id}')">Eliminar</button></div></div></div>`}
 function events(){app.innerHTML=`<div class=card><h2>🎟️ Eventos</h2><button class=primary onclick=eventForm()>+ Nuevo evento</button></div>${db.events.map(e=>`<div class=card>${e.image?`<div class=visualCard><img src="${esc(e.image)}"><div class=vtxt><h2>${esc(e.name)}</h2><p>${esc(e.date)} · ${esc(e.place)}</p></div></div>`:`<h2>${esc(e.name)}</h2>`}<p class=muted>${esc(e.type)} · ${esc(e.date)} · ${esc(e.place)}</p>${linkBox("Entrada / documento",e.docLink)}${e.map?`<p><a class=mapBtn target=_blank href="${mapLink(e.map)}">Abrir Maps</a></p>`:""}<p>${esc(e.notes||"")}</p><div class=actions><button class=secondary onclick="eventForm('${e.id}')">Editar</button><button class=danger onclick="del('events','${e.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin eventos.</div>"}`}
 function reservations(){app.innerHTML=`<div class=card><h2>📧 Reservas</h2><button class=primary onclick=reservationForm()>+ Nueva reserva</button></div>${db.reservations.map(r=>`<div class=card>${r.image?`<div class=visualCard><img src="${esc(r.image)}"><div class=vtxt><h2>${esc(r.name)}</h2><p>${esc(r.type)} · ${esc(r.date)}</p></div></div>`:`<h2>${esc(r.name)}</h2>`}<p class=muted>${esc(r.type)} · ${esc(r.date)}</p>${r.locator?`<p><b>Localizador:</b> ${esc(r.locator)}</p>`:""}${r.address?`<p><a class=mapBtn target=_blank href="${mapLink(r.address)}">Abrir Maps</a></p>`:""}${linkBox("PDF / documento reserva",r.docLink)}<details><summary><b>Email / texto original</b></summary><div class=noteText>${linkify(esc(r.raw||""))}</div></details><div class=actions><button class=secondary onclick="reservationForm('${r.id}')">Editar</button><button class=danger onclick="del('reservations','${r.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin reservas.</div>"}`}
 function docs(){app.innerHTML=`<div class=card><h2>📂 Documentos</h2><button class=primary onclick=docForm()>+ Añadir documento</button></div>${db.docs.map(d=>`<div class=card><h2>${esc(d.name)}</h2><p class=muted>${esc(d.type)}</p>${linkBox("Abrir documento",d.link)}<p>${esc(d.notes||"")}</p><div class=actions><button class=secondary onclick="docForm('${d.id}')">Editar</button><button class=danger onclick="del('docs','${d.id}')">Eliminar</button></div></div>`).join("")||"<div class=empty>Sin documentos.</div>"}`}
@@ -193,4 +207,28 @@ function shareTrip(id){
   let text=`${t.name}\n${t.dates}\n${t.destination}\n\n${t.summary||""}\n\nHotel: ${t.hotel||""}\n\n${(t.notes||[]).map(n=>"--- "+n.title+" ---\n"+n.body).join("\n\n")}`;
   showModal("Compartir viaje",`<p class=muted>Copia este texto para WhatsApp, Notas o Mail.</p><div class=shareBox>${esc(text)}</div><button class=primary onclick="navigator.clipboard.writeText(document.querySelector('.shareBox').innerText)">Copiar</button>`);
 }
-function del(c,id){if(confirm("¿Eliminar?")){db[c]=db[c].filter(x=>x.id!==id);save();render()}}function syncView(){app.innerHTML=`<div class=card><h2>🔄 Exportar / Importar</h2><p class=muted>Forma rápida de pasar datos del Mac al iPhone.</p><button class=primary onclick=exportAll()>Exportar todo</button><label>Importar archivo JSON</label><input id=importFile type=file accept="application/json"><button class=primary onclick=importAll()>Importar</button></div>`}function exportAll(){dl("viajes-plans-backup.json",JSON.stringify(db,null,2))}function importAll(){let f=importFile.files[0];if(!f)return alert("Elige el JSON");let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert("Importado");view="home";render()}catch(e){alert("Archivo no válido")}};r.readAsText(f)}render();
+
+function exportTrip(id){
+  let t=db.trips.find(x=>String(x.id)===String(id)); if(!t)return;
+  let data={type:"viajes-plans-trip",version:14,trip:t};
+  dl((t.name||"viaje").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".json",JSON.stringify(data,null,2));
+}
+function importTripFile(){
+  let f=document.getElementById("tripImportFile")?.files?.[0];
+  if(!f)return alert("Elige un archivo JSON de viaje");
+  let r=new FileReader();
+  r.onload=()=>{try{let data=JSON.parse(r.result);let t=data.trip||data;if(!t.name)throw new Error();t.id=uid();db.trips.push(t);save();alert("Viaje importado");view="trips";render()}catch(e){alert("Archivo de viaje no válido")}};
+  r.readAsText(f);
+}
+function shareTripText(id){
+  let t=db.trips.find(x=>String(x.id)===String(id)); if(!t)return;
+  let text=`${t.name}\n${t.dates}\n${t.destination}\n\n${t.summary||""}\n\nHotel: ${t.hotel||""}\n\n${(t.notes||[]).map(n=>"--- "+n.title+" ---\n"+n.body).join("\n\n")}`;
+  showModal("Compartir viaje",`<p class=muted>Copia este texto o exporta el JSON para otro móvil.</p><div class=shareBox>${esc(text)}</div><button class=primary onclick="navigator.clipboard.writeText(document.querySelector('.shareBox').innerText)">Copiar texto</button><button class=secondary onclick="exportTrip('${id}')">Exportar viaje JSON</button>`);
+}
+function del(c,id){if(confirm("¿Eliminar?")){db[c]=db[c].filter(x=>x.id!==id);save();render()}}function syncView(){app.innerHTML=`<div class=card><h2>🔄 Exportar / Importar</h2><p class=muted>Copia completa y viajes compartidos.</p><button class=primary onclick=exportAll()>Exportar todo</button><label>Importar copia completa JSON</label><input id=importFile type=file accept="application/json"><button class=primary onclick=importAll()>Importar copia completa</button><hr><label>Importar viaje compartido</label><input id=tripImportFile type=file accept="application/json"><button class=secondary onclick=importTripFile()>Importar viaje</button><p class=muted>Versión V14 Final</p></div>`}
+function exportAll(){dl("viajes-plans-backup.json",JSON.stringify(db,null,2))}function importAll(){let f=importFile.files[0];if(!f)return alert("Elige el JSON");let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert("Importado");view="home";render()}catch(e){alert("Archivo no válido")}};r.readAsText(f)}render();
+
+document.addEventListener("click",e=>{
+  let card=e.target.closest("[data-open-trip]");
+  if(card){openTrip(card.dataset.openTrip);}
+});
