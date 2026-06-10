@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Viajes & Plans">
+<meta name="theme-color" content="#0f0f1a">
+<title>Viajes & Plans</title>
+<style>
+:root {
+  --bg: #f2f0eb;
+  --card: #ffffff;
+  --text: #111111;
+  --text2: #5a5a5a;
+  --text3: #9a9a9a;
+  --border: rgba(0,0,0,0.07);
+  --navy: #0f0f1a;
+  --navy2: #1a1a2e;
+  --teal: #5DCAA5;
+  --teal-d: #04342C;
+  --teal-l: #E1F5EE;
+  --purple: #7F77DD;
+  --purple-d: #26215C;
+  --purple-l: #EEEDFE;
+  --amber: #EF9F27;
+  --amber-d: #412402;
+  --amber-l: #FEF3C7;
+  --blue: #3B82F6;
+  --blue-d: #1e3a5f;
+  --blue-l: #EFF6FF;
+  --coral: #F05A28;
+  --coral-l: #FEF0EB;
+  --coral-d: #5a1800;
+  --r: 20px;
+  --r-sm: 14px;
+  --safe-t: env(safe-area-inset-top, 44px);
+  --safe-b: env(safe-area-inset-bottom, 34px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100vh;padding-bottom:calc(76px + var(--safe-b))}
+.screen.active{display:flex}
+
+/* TABBAR */
+.tabbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:0.5px solid var(--border);
+  display:flex;justify-content:space-around;
+  padding:10px 0 calc(10px + var(--safe-b));
+}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 16px;cursor:pointer;min-width:60px}
+.tab-ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.tab-ic svg{width:24px;height:24px;stroke:var(--text3);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.tab span{font-size:10px;color:var(--text3);transition:color .2s;font-weight:500}
+.tab.active .tab-ic svg{stroke:var(--blue)}
+.tab.active span{color:var(--blue)}
+
+/* HOME HEADER */
+.home-hd{background:var(--card);padding:calc(var(--safe-t) + 16px) 20px 20px}
+.home-date{font-size:13px;color:var(--text3);margin-bottom:4px;font-weight:400}
+.home-title{font-size:28px;font-weight:700;letter-spacing:-.6px;color:var(--text)}
+.home-sub{font-size:14px;color:var(--text2);margin-top:4px}
+
+/* HERO TRIP CARD */
+.hero-wrap{padding:14px 14px 0}
+.hero-card{
+  border-radius:var(--r);overflow:hidden;
+  position:relative;height:220px;cursor:pointer;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+}
+.hero-img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 55%,transparent 100%);
+}
+.hero-top{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start}
+.hero-weather{background:rgba(255,255,255,.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:30px;padding:5px 12px;display:flex;align-items:center;gap:5px}
+.hero-weather span{font-size:12px;color:#fff;font-weight:500}
+.hero-countdown{background:var(--teal);border-radius:30px;padding:5px 12px;text-align:center}
+.hero-cd-n{font-size:15px;font-weight:700;color:var(--teal-d);line-height:1}
+.hero-cd-l{font-size:9px;color:#085041;text-transform:uppercase;letter-spacing:.4px}
+.hero-bottom{position:absolute;bottom:14px;left:14px;right:14px}
+.hero-name{font-size:24px;font-weight:700;color:#fff;letter-spacing:-.4px;line-height:1.1}
+.hero-dest{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px}
+.hero-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:20px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.9);font-weight:500}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 14px 0}
+.sc{border-radius:var(--r-sm);padding:14px;cursor:pointer;position:relative;overflow:hidden}
+.sc.purple{background:var(--purple-l)}
+.sc.teal{background:var(--teal-l)}
+.sc.amber{background:var(--amber-l)}
+.sc.coral{background:var(--coral-l)}
+.sc-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.sc-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sc.purple .sc-icon{background:var(--purple)}
+.sc.teal .sc-icon{background:var(--teal)}
+.sc.amber .sc-icon{background:var(--amber)}
+.sc.coral .sc-icon{background:var(--coral)}
+.sc-n{font-size:26px;font-weight:700;line-height:1}
+.sc.purple .sc-n{color:var(--purple-d)}
+.sc.teal .sc-n{color:var(--teal-d)}
+.sc.amber .sc-n{color:var(--amber-d)}
+.sc.coral .sc-n{color:var(--coral-d)}
+.sc-l{font-size:11px;margin-top:2px;font-weight:500}
+.sc.purple .sc-l{color:var(--purple)}
+.sc.teal .sc-l{color:#0F6E56}
+.sc.amber .sc-l{color:#854F0B}
+.sc.coral .sc-l{color:var(--coral)}
+
+/* SECTION */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px}
+.sec-hd h2{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.sec-hd button{font-size:13px;color:var(--blue);background:none;border:none;cursor:pointer;font-weight:500}
+
+/* HORIZONTAL SCROLL */
+.hscroll{display:flex;gap:10px;padding:0 14px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hscroll::-webkit-scrollbar{display:none}
+
+/* TRIP CARD SMALL */
+.tc{min-width:155px;border-radius:var(--r);overflow:hidden;flex-shrink:0;background:var(--card);box-shadow:0 2px 12px rgba(0,0,0,.08);cursor:pointer}
+.tc-img{height:100px;overflow:hidden;position:relative}
+.tc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.tc-badge{position:absolute;bottom:8px;left:8px;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px}
+.tc-badge.green{background:var(--teal);color:var(--teal-d)}
+.tc-badge.blue{background:var(--blue);color:#fff}
+.tc-body{padding:9px 11px 11px}
+.tc-body h3{font-size:13px;font-weight:700;color:var(--text)}
+.tc-body p{font-size:10px;color:var(--text2);margin-top:2px}
+.tc-pills{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.pill{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.1px}
+.pill.blue{background:var(--blue-l);color:var(--blue-d)}
+.pill.teal{background:var(--teal-l);color:var(--teal-d)}
+.pill.amber{background:var(--amber-l);color:var(--amber-d)}
+.pill.purple{background:var(--purple-l);color:var(--purple-d)}
+
+/* AGENDA */
+.agenda{padding:0 14px}
+.ar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:8px;box-shadow:0 1px 6px rgba(0,0,0,.05);cursor:pointer}
+.ar-date{min-width:44px;border-radius:11px;padding:6px 4px;text-align:center;flex-shrink:0}
+.ar-date.ev{background:var(--purple-l)}
+.ar-date.ho{background:var(--teal-l)}
+.ar-date.re{background:var(--amber-l)}
+.ar-date .d{font-size:18px;font-weight:700;line-height:1}
+.ar-date .m{font-size:9px;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;font-weight:600}
+.ar-date.ev .d,.ar-date.ev .m{color:#3C3489}
+.ar-date.ho .d,.ar-date.ho .m{color:var(--teal-d)}
+.ar-date.re .d,.ar-date.re .m{color:var(--amber-d)}
+.ar-body{flex:1;min-width:0}
+.ar-body h3{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ar-body p{font-size:11px;color:var(--text2);margin-top:2px}
+.ar-tag{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.2px}
+.ar-tag.ev{background:var(--purple-l);color:var(--purple-d)}
+.ar-tag.ho{background:var(--teal-l);color:var(--teal-d)}
+.ar-tag.re{background:var(--amber-l);color:var(--amber-d)}
+
+/* PAGE HEADER */
+.pg-hd{background:var(--card);padding:calc(var(--safe-t) + 16px) 20px 18px;border-bottom:0.5px solid var(--border)}
+.pg-hd h1{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.pg-hd p{font-size:14px;color:var(--text2);margin-top:3px}
+
+/* TRIP FULL CARD (trips list) */
+.trips-list{padding:14px;display:flex;flex-direction:column;gap:14px}
+.tfc{border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:0 3px 16px rgba(0,0,0,.09);cursor:pointer}
+.tfc-img{height:180px;overflow:hidden;position:relative}
+.tfc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.tfc-img .tfc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 50%)}
+.tfc-img-bottom{position:absolute;bottom:14px;left:16px;right:16px}
+.tfc-img-bottom h2{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.4px}
+.tfc-img-bottom p{font-size:12px;color:rgba(255,255,255,.75);margin-top:3px}
+.tfc-body{padding:14px 16px 16px}
+.tfc-row{display:flex;justify-content:space-between;align-items:center}
+.tfc-meta{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px}
+.tfc-meta svg{width:14px;height:14px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tfc-btn{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:30px;border:none;cursor:pointer}
+
+/* DETAIL / TRIP NOTES */
+.det-hd{background:var(--navy);position:relative;overflow:hidden}
+.det-hd-img{width:100%;height:220px;object-fit:cover;display:block;opacity:.5}
+.det-hd-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--navy) 0%,transparent 60%)}
+.det-hd-content{position:absolute;bottom:0;left:0;right:0;padding:20px}
+.det-back{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;background:none;border:none;padding:0;position:absolute;top:calc(var(--safe-t) + 12px);left:16px}
+.det-back svg{width:20px;height:20px;stroke:rgba(255,255,255,.7);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.det-weather-pill{position:absolute;top:calc(var(--safe-t) + 12px);right:16px;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:30px;padding:5px 12px;display:flex;align-items:center;gap:5px}
+.det-weather-pill span{font-size:12px;color:#fff;font-weight:500}
+.det-title{font-size:26px;font-weight:700;color:#fff;letter-spacing:-.4px}
+.det-sub{font-size:13px;color:rgba(255,255,255,.6);margin-top:3px}
+.det-chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+
+.notes-wrap{padding:14px 14px 0}
+.note-card{background:var(--card);border-radius:var(--r-sm);margin-bottom:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.note-hd{padding:13px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.note-hd h3{font-size:14px;font-weight:600;flex:1;padding-right:8px;line-height:1.3}
+.note-hd svg{width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:transform .3s}
+.note-body{display:none;padding:12px 14px 14px;font-size:13px;color:var(--text2);line-height:1.75;white-space:pre-wrap;border-top:0.5px solid var(--border)}
+.note-body a{color:var(--blue);text-decoration:none;font-weight:500}
+.note-card.open .note-body{display:block}
+.note-card.open .note-hd svg{transform:rotate(180deg)}
+
+/* EVENTS */
+.events-list{padding:14px;display:flex;flex-direction:column;gap:14px}
+.ev-card{border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:0 3px 16px rgba(0,0,0,.09);cursor:pointer}
+.ev-banner{height:200px;overflow:hidden;position:relative}
+.ev-banner img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.ev-banner .ev-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.1) 50%,transparent 100%)}
+.ev-banner-content{position:absolute;bottom:14px;left:14px;right:14px}
+.ev-banner-tag{display:inline-block;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:7px;letter-spacing:.3px}
+.ev-banner-tag.concert{background:var(--purple);color:#fff}
+.ev-banner-tag.entrada{background:var(--teal);color:var(--teal-d)}
+.ev-banner-title{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.1}
+.ev-banner-sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:4px}
+.ev-body{padding:14px 16px 16px}
+.ev-meta{display:flex;gap:14px;margin-bottom:12px}
+.ev-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.ev-meta-item svg{width:14px;height:14px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ev-actions{display:flex;gap:8px}
+.ev-btn{flex:1;padding:11px 8px;border-radius:var(--r-sm);font-size:13px;font-weight:700;text-align:center;text-decoration:none;border:none;cursor:pointer;display:block}
+.ev-btn.primary{background:var(--navy);color:#fff}
+.ev-btn.secondary{background:var(--purple-l);color:var(--purple-d)}
+.ev-btn.teal{background:var(--teal-l);color:var(--teal-d)}
+.ev-btn.disabled{background:#f0f0f0;color:#aaa;cursor:default;pointer-events:none}
+
+/* RESERVATIONS */
+.res-list{padding:14px;display:flex;flex-direction:column;gap:14px}
+.res-card{border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:0 3px 16px rgba(0,0,0,.09)}
+.res-banner{height:170px;overflow:hidden;position:relative}
+.res-banner img{width:100%;height:100%;object-fit:cover;display:block}
+.res-banner .res-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 55%)}
+.res-banner-content{position:absolute;bottom:12px;left:14px;right:14px}
+.res-banner-tag{display:inline-block;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:6px;letter-spacing:.3px}
+.res-banner-tag.hotel{background:var(--teal);color:var(--teal-d)}
+.res-banner-tag.restaurante{background:var(--amber);color:var(--amber-d)}
+.res-banner-title{font-size:20px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.1}
+.res-banner-date{font-size:12px;color:rgba(255,255,255,.7);margin-top:3px}
+.res-body{padding:14px 16px 16px}
+.res-detail{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.res-actions{display:flex;gap:8px}
+.res-btn{flex:1;padding:11px 8px;border-radius:var(--r-sm);font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:block;border:none;cursor:pointer}
+.res-btn.map{background:var(--teal-l);color:var(--teal-d)}
+.res-btn.doc{background:var(--blue-l);color:var(--blue-d)}
+.res-btn.disabled{background:#f0f0f0;color:#aaa;pointer-events:none}
+.res-raw-toggle{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue);font-weight:600;background:none;border:none;cursor:pointer;margin-top:10px;padding:0}
+.res-raw{display:none;background:var(--bg);border-radius:var(--r-sm);padding:12px;margin-top:8px;font-size:12px;color:var(--text2);line-height:1.65;white-space:pre-wrap}
+.res-raw.open{display:block}
+
+/* SHARE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:24px 24px 0 0;padding:20px 20px calc(20px + var(--safe-b));width:100%;max-height:80vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
+.share-opt{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:0.5px solid var(--border);cursor:pointer}
+.share-opt:last-child{border-bottom:none}
+.share-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.share-text h3{font-size:15px;font-weight:600}
+.share-text p{font-size:12px;color:var(--text2);margin-top:2px}
+.modal-close{display:block;width:100%;padding:14px;background:var(--bg);border-radius:var(--r-sm);border:none;font-size:15px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:10px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HOME ══════════ -->
+<div class="screen active" id="screen-home">
+  <div class="home-hd">
+    <div class="home-date" id="today-date"></div>
+    <div class="home-title">Viajes &amp; Plans</div>
+    <div class="home-sub">Tu próximo viaje: Conil · <span id="home-days" style="font-weight:600;color:var(--teal-d)"></span></div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero-wrap">
+    <div class="hero-card" onclick="openTrip(0)">
+      <img class="hero-img" src="https://media.traveler.es/photos/6137692332d932c80fcb8b1a/master/w_1600,c_limit/148617.jpg" alt="Conil" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800'">
+      <div class="hero-overlay"></div>
+      <div class="hero-top">
+        <div class="hero-weather" id="hero-weather"><span>⏳ Cargando...</span></div>
+        <div class="hero-countdown" id="hero-countdown">
+          <div class="hero-cd-n" id="cd-n">--</div>
+          <div class="hero-cd-l">días</div>
+        </div>
+      </div>
+      <div class="hero-bottom">
+        <div class="hero-name">Conil 2026</div>
+        <div class="hero-dest">📍 Sevilla · Conil de la Frontera</div>
+        <div class="hero-chips">
+          <div class="hero-chip">🏖️ 8 días</div>
+          <div class="hero-chip">🏠 Chalet Pinar de Roche</div>
+          <div class="hero-chip">📝 9 notas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div class="sc purple" onclick="showScreen('events')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>
+      <div class="sc-n">3</div>
+      <div class="sc-l">Eventos</div>
+    </div>
+    <div class="sc teal" onclick="showScreen('reservations')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="sc-n">3</div>
+      <div class="sc-l">Reservas</div>
+    </div>
+    <div class="sc amber" onclick="showScreen('trips')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+      <div class="sc-n">2</div>
+      <div class="sc-l">Viajes</div>
+    </div>
+    <div class="sc coral">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+      <div class="sc-n">13</div>
+      <div class="sc-l">Notas</div>
+    </div>
+  </div>
+
+  <!-- Trips scroll -->
+  <div class="sec-hd"><h2>Mis viajes</h2><button onclick="showScreen('trips')">Ver todos</button></div>
+  <div class="hscroll">
+    <div class="tc" onclick="openTrip(0)">
+      <div class="tc-img">
+        <img src="https://media.traveler.es/photos/6137692332d932c80fcb8b1a/master/w_1600,c_limit/148617.jpg" alt="Conil" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400'">
+        <span class="tc-badge green" id="conil-badge">-- días</span>
+      </div>
+      <div class="tc-body"><h3>Conil 2026</h3><p>14–21 Jul · 8 días</p>
+        <div class="tc-pills"><span class="pill teal">Playa</span><span class="pill amber">Sevilla</span></div>
+      </div>
+    </div>
+    <div class="tc" onclick="openTrip(1)">
+      <div class="tc-img">
+        <img src="https://content-viajes.nationalgeographic.com.es/medio/2025/12/05/shutterstock_d1035b54_2488933077_251205104013_1280x848.webp" alt="Bruselas" onerror="this.src='https://images.unsplash.com/photo-1559113202-c916b8e44373?w=400'">
+        <span class="tc-badge blue">4 Sep</span>
+      </div>
+      <div class="tc-body"><h3>Bruselas 2026</h3><p>4–8 Sep · 5 días</p>
+        <div class="tc-pills"><span class="pill blue">Vuelo</span><span class="pill purple">Brujas</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agenda -->
+  <div class="sec-hd"><h2>Agenda próxima</h2></div>
+  <div class="agenda">
+    <div class="ar" onclick="showScreen('reservations')">
+      <div class="ar-date ho"><div class="d">14</div><div class="m">Jul</div></div>
+      <div class="ar-body"><h3>Triana 143 · Check-in</h3><p>Calle Castilla, Sevilla</p></div>
+      <span class="ar-tag ho">Hotel</span>
+    </div>
+    <div class="ar" onclick="showScreen('reservations')">
+      <div class="ar-date re"><div class="d">14</div><div class="m">Jul</div></div>
+      <div class="ar-body"><h3>María Trifulca</h3><p>Cena · Triana, Sevilla</p></div>
+      <span class="ar-tag re">Cena</span>
+    </div>
+    <div class="ar" onclick="showScreen('reservations')">
+      <div class="ar-date re"><div class="d">18</div><div class="m">Jul</div></div>
+      <div class="ar-body"><h3>El Cuartel del Mar</h3><p>22:30 · 5 personas · Exterior</p></div>
+      <span class="ar-tag re">Cena</span>
+    </div>
+    <div class="ar" onclick="showScreen('events')">
+      <div class="ar-date ev"><div class="d">25</div><div class="m">Jul</div></div>
+      <div class="ar-body"><h3>Aitana · Avilés</h3><p>Concierto</p></div>
+      <span class="ar-tag ev">Concierto</span>
+    </div>
+    <div class="ar" onclick="showScreen('events')">
+      <div class="ar-date ev"><div class="d">25</div><div class="m">Jul</div></div>
+      <div class="ar-body"><h3>Pet Shop Boys · Santander</h3><p>Concierto</p></div>
+      <span class="ar-tag ev">Concierto</span>
+    </div>
+    <div class="ar" onclick="showScreen('events')">
+      <div class="ar-date ev"><div class="d">6</div><div class="m">Sep</div></div>
+      <div class="ar-body"><h3>Excursión Brujas y Gante</h3><p>Civitatis · Grand Place</p></div>
+      <span class="ar-tag ev">Entrada</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TRIPS LIST ══════════ -->
+<div class="screen" id="screen-trips">
+  <div class="pg-hd">
+    <h1>Mis viajes</h1>
+    <p>2 viajes planificados</p>
+  </div>
+  <div class="trips-list">
+    <div class="tfc" onclick="openTrip(0)">
+      <div class="tfc-img">
+        <img src="https://media.traveler.es/photos/6137692332d932c80fcb8b1a/master/w_1600,c_limit/148617.jpg" alt="Conil" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800'">
+        <div class="tfc-overlay"></div>
+        <div class="tfc-img-bottom">
+          <h2>Conil 2026</h2>
+          <p>📍 Sevilla · Conil de la Frontera</p>
+        </div>
+      </div>
+      <div class="tfc-body">
+        <div class="tfc-row">
+          <div class="tfc-meta"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>14 al 21 Julio 2026</div>
+          <button class="tfc-btn">Ver itinerario</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <span class="pill teal">9 notas</span><span class="pill amber">Playa</span><span class="pill amber">Chalet</span>
+        </div>
+      </div>
+    </div>
+    <div class="tfc" onclick="openTrip(1)">
+      <div class="tfc-img">
+        <img src="https://content-viajes.nationalgeographic.com.es/medio/2025/12/05/shutterstock_d1035b54_2488933077_251205104013_1280x848.webp" alt="Bruselas" onerror="this.src='https://images.unsplash.com/photo-1559113202-c916b8e44373?w=800'">
+        <div class="tfc-overlay"></div>
+        <div class="tfc-img-bottom">
+          <h2>Bruselas 2026</h2>
+          <p>📍 Bruselas · Gante · Brujas</p>
+        </div>
+      </div>
+      <div class="tfc-body">
+        <div class="tfc-row">
+          <div class="tfc-meta"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>4 al 8 Septiembre 2026</div>
+          <button class="tfc-btn">Ver itinerario</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <span class="pill blue">4 notas</span><span class="pill purple">Brujas</span><span class="pill purple">Gante</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TRIP DETAIL ══════════ -->
+<div class="screen" id="screen-detail">
+  <div class="det-hd">
+    <img class="det-hd-img" id="det-img" src="" alt="">
+    <div class="det-hd-overlay"></div>
+    <button class="det-back" onclick="backFromDetail()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver
+    </button>
+    <div class="det-weather-pill" id="det-weather"><span>⏳</span></div>
+    <div class="det-hd-content">
+      <div id="det-title" style="font-size:26px;font-weight:700;color:#fff;letter-spacing:-.4px"></div>
+      <div id="det-sub" style="font-size:13px;color:rgba(255,255,255,.65);margin-top:3px"></div>
+      <div class="det-chips" id="det-chips"></div>
+    </div>
+  </div>
+  <div style="padding:10px 14px 4px;display:flex;justify-content:flex-end">
+    <button onclick="openShareModal('trip')" style="display:flex;align-items:center;gap:5px;background:var(--navy);color:#fff;border:none;border-radius:30px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Compartir viaje
+    </button>
+  </div>
+  <div class="notes-wrap" id="det-notes"></div>
+</div>
+
+<!-- ══════════ EVENTS ══════════ -->
+<div class="screen" id="screen-events">
+  <div class="pg-hd">
+    <h1>Eventos</h1>
+    <p>3 eventos · julio y septiembre</p>
+  </div>
+  <div class="events-list">
+
+    <!-- Aitana -->
+    <div class="ev-card">
+      <div class="ev-banner">
+        <img src="https://mallorcalivefestival.com/wp-content/uploads/2025/10/aitana-imagen-web.jpg" alt="Aitana" onerror="this.src='https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800'">
+        <div class="ev-overlay"></div>
+        <div class="ev-banner-content">
+          <div class="ev-banner-tag concert">Concierto</div>
+          <div class="ev-banner-title">Aitana</div>
+          <div class="ev-banner-sub">📅 25 julio 2026 · 📍 Avilés</div>
+        </div>
+      </div>
+      <div class="ev-body">
+        <div class="ev-meta">
+          <div class="ev-meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>25 Jul 2026</div>
+          <div class="ev-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Avilés, Asturias</div>
+        </div>
+        <div class="ev-actions">
+          <a href="https://maps.app.goo.gl/xzWVNvzkryAdAQv27?g_st=ic" target="_blank" class="ev-btn secondary">📍 Ver en mapa</a>
+          <a href="https://venta.enterticket.es/entradas?data=eyJvcmRlciI6IjQ1NTU2Y2RkMFdNUCIsImhhc2giOiJCRDQ0NTg5MkFERDhEOTZFNzY1RkQ2Q0VBOTZEQzhFNDEzMTUyNzBEM0M0ODgzNDVFQkMyRDA3NEQ4MkRFRDNGIn0%3D&dest=I&lang=es_ES" target="_blank" class="ev-btn primary">🎟️ Mi entrada</a>
+        </div>
+        <button onclick="openShareModal('event','Aitana · Avilés · 25 Jul 2026')" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;padding:0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Compartir evento
+        </button>
+      </div>
+    </div>
+
+    <!-- Pet Shop Boys -->
+    <div class="ev-card">
+      <div class="ev-banner">
+        <img src="https://festivalea.es/wp-content/uploads/2026/03/Pet-Shop-Boys.jpg" alt="Pet Shop Boys" onerror="this.src='https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800'">
+        <div class="ev-overlay"></div>
+        <div class="ev-banner-content">
+          <div class="ev-banner-tag concert">Concierto</div>
+          <div class="ev-banner-title">Pet Shop Boys</div>
+          <div class="ev-banner-sub">📅 25 julio 2026 · 📍 Santander</div>
+        </div>
+      </div>
+      <div class="ev-body">
+        <div class="ev-meta">
+          <div class="ev-meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>25 Jul 2026</div>
+          <div class="ev-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Santander</div>
+        </div>
+        <div class="ev-actions">
+          <a href="https://maps.app.goo.gl/W4L4krXAbMzWeE697" target="_blank" class="ev-btn secondary">📍 Ver en mapa</a>
+          <a href="https://checkoutentradas.elcorteingles.es/open/wdist/checkout/tickets/es/0qCZTbdJYj6M6pDMfxi9Iw%3D%3D?email=5dnI_O3qaoeQWg7K0iW_yyxL6UEAAMEubTxczsQdBHE=" target="_blank" class="ev-btn primary">🎟️ Mi entrada</a>
+        </div>
+        <button onclick="openShareModal('event','Pet Shop Boys · Santander · 25 Jul 2026')" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;padding:0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Compartir evento
+        </button>
+      </div>
+    </div>
+
+    <!-- Excursion Brujas -->
+    <div class="ev-card">
+      <div class="ev-banner">
+        <img src="https://www.civitatis.com/f/belgica/bruselas/guia/brujas-m.jpg" alt="Brujas" onerror="this.src='https://images.unsplash.com/photo-1559113202-c916b8e44373?w=800'">
+        <div class="ev-overlay"></div>
+        <div class="ev-banner-content">
+          <div class="ev-banner-tag entrada">Entrada</div>
+          <div class="ev-banner-title">Excursión Gante y Brujas</div>
+          <div class="ev-banner-sub">📅 6 septiembre 2026 · 📍 Grand Place, Bruselas</div>
+        </div>
+      </div>
+      <div class="ev-body">
+        <div class="ev-meta">
+          <div class="ev-meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>6 Sep 2026</div>
+          <div class="ev-meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Civitatis</div>
+        </div>
+        <div class="ev-actions">
+          <a href="https://maps.app.goo.gl/rRpCc3hikbrqiF86A?g_st=ic" target="_blank" class="ev-btn teal">📍 Punto encuentro</a>
+          <a href="https://voucher.civitatis.com/voucher/UjFKUjF6M09ZbVhxOE53MVZSUGc5UT09OjozaXFVQzJXd3NM/ajh3eXlERkpYUG9mL3pEWnFadUZuUT09OjozaXFVQzJXd3NM/1" target="_blank" class="ev-btn primary">📄 Ver bono</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ RESERVATIONS ══════════ -->
+<div class="screen" id="screen-reservations">
+  <div class="pg-hd">
+    <h1>Reservas</h1>
+    <p>3 reservas confirmadas</p>
+  </div>
+  <div class="res-list">
+
+    <!-- Triana 143 -->
+    <div class="res-card">
+      <div class="res-banner">
+        <img src="https://cf.bstatic.com/xdata/images/hotel/max1024x768/315205288.jpg?k=311e42fcb6ae2c2b3f4e980bb1ca9dc2b9a97818d918f9b8545422ed373f8177&o=" alt="Triana 143" onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800'">
+        <div class="res-overlay"></div>
+        <div class="res-banner-content">
+          <div class="res-banner-tag hotel">Hotel</div>
+          <div class="res-banner-title">Triana 143 · Wifi</div>
+          <div class="res-banner-date">📅 14 julio 2026 · Sevilla, Triana</div>
+        </div>
+      </div>
+      <div class="res-body">
+        <div class="res-detail">🏠 Calle Castilla, Sevilla · Barrio de Triana</div>
+        <div class="res-actions">
+          <a href="https://maps.app.goo.gl/qU3UvLtNUfGditB48?g_st=ic" target="_blank" class="res-btn map">📍 Cómo llegar</a>
+          <a href="https://drive.google.com/file/d/1vkwucDAyJn49v2YvcfX7mzuzg042ZzNA/view?usp=drivesdk" target="_blank" class="res-btn doc">📄 Documento</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- María Trifulca -->
+    <div class="res-card">
+      <div class="res-banner">
+        <img src="https://www.therooftopguide.com/rooftop-bars-in-seville/Bilder/mariatrifulca-600-1.jpg" alt="María Trifulca" onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800'">
+        <div class="res-overlay"></div>
+        <div class="res-banner-content">
+          <div class="res-banner-tag restaurante">Restaurante</div>
+          <div class="res-banner-title">María Trifulca</div>
+          <div class="res-banner-date">📅 14 julio 2026 · Cena · Triana</div>
+        </div>
+      </div>
+      <div class="res-body">
+        <div class="res-detail">🍽️ Reservar 5–7 días antes · Pedir terraza</div>
+        <div class="res-actions">
+          <a href="https://maps.app.goo.gl/5g9XN5ePaUPG7bTr5" target="_blank" class="res-btn map">📍 Cómo llegar</a>
+          <span class="res-btn disabled">📄 Sin doc</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- El Cuartel del Mar -->
+    <div class="res-card">
+      <div class="res-banner">
+        <img src="https://phantom-elmundo.unidadeditorial.es/1a951841386bb7d5f62d2207be624bac/crop/0x0/3072x2048/resize/746/f/webp/assets/multimedia/imagenes/2021/07/19/16266846356258.jpg" alt="El Cuartel del Mar" onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800'">
+        <div class="res-overlay"></div>
+        <div class="res-banner-content">
+          <div class="res-banner-tag restaurante">Restaurante</div>
+          <div class="res-banner-title">El Cuartel del Mar</div>
+          <div class="res-banner-date">📅 18 julio · 22:30 · 5 personas · Exterior</div>
+        </div>
+      </div>
+      <div class="res-body">
+        <div class="res-detail">📍 C. Bajada Torre del Puerco s/n, Chiclana, Cádiz<br>📞 (34) 956 064 433 · ✉️ info@elcuarteldelmar.com<br>⚠️ Cancelación &lt;12h → 20€/comensal</div>
+        <div class="res-actions">
+          <a href="https://maps.app.goo.gl/wHs8YBcMCuAskaeG6" target="_blank" class="res-btn map">📍 Cómo llegar</a>
+          <span class="res-btn disabled">📄 Sin doc</span>
+        </div>
+        <button class="res-raw-toggle" onclick="toggleRaw(this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Ver confirmación completa
+        </button>
+        <div class="res-raw">Hola GABINO PABLO MORRONDO RODRIGUEZ,
+
+Tu reserva en El Cuartel del Mar ha sido confirmada:
+
+📅 Fecha: 18/07/2026
+🕥 Hora: 22:30
+👥 Personas: 5
+📍 Zona: EXTERIOR (a la carta)
+⏱ Duración: 1h 45 min
+⚠️ +10% en zona exterior
+
+Cancelación con menos de 12h → 20€/comensal
+
+📞 (34) 956 064 433
+✉️ info@elcuarteldelmar.com
+
+C. Bajada de la Torre del Puerco s/n
+Chiclana de la Frontera, 11130 Cádiz</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ SHARE MODAL ══════════ -->
+<div class="modal-overlay" id="modal-share" onclick="closeShareModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">Compartir</div>
+    <div id="modal-content"></div>
+    <button class="modal-close" onclick="closeShareModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ══════════ TAB BAR ══════════ -->
+<nav class="tabbar">
+  <div class="tab active" id="tab-home" onclick="showScreen('home')">
+    <div class="tab-ic"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span>Inicio</span>
+  </div>
+  <div class="tab" id="tab-trips" onclick="showScreen('trips')">
+    <div class="tab-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+    <span>Viajes</span>
+  </div>
+  <div class="tab" id="tab-events" onclick="showScreen('events')">
+    <div class="tab-ic"><svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>
+    <span>Eventos</span>
+  </div>
+  <div class="tab" id="tab-reservations" onclick="showScreen('reservations')">
+    <div class="tab-ic"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+    <span>Reservas</span>
+  </div>
+</nav>
+
+<script>
+// ── DATA ──
+const TRIPS = [
+  {
+    name:"Conil 2026", dest:"Sevilla · Conil de la Frontera",
+    dates:"14 al 21 Julio 2026", startDate:"2026-07-14",
+    cover:"https://media.traveler.es/photos/6137692332d932c80fcb8b1a/master/w_1600,c_limit/148617.jpg",
+    weatherCity:"Conil de la Frontera,ES",
+    chips:["🏖️ 8 días","🏠 Chalet","☀️ Verano"],
+    notes:[
+      {title:"🅿️ Parkings Sevilla y Cáceres",body:`🅿️ SEVILLA (Triana)
+
+Parking Mercado de Triana
+📍 https://maps.google.com/?q=Parking+Mercado+de+Triana
+✔ 2–3 min del Puente de Triana · apto Mercedes Clase T
+
+Alternativa: Parking Plaza de Cuba
+📍 https://maps.google.com/?q=Parking+Plaza+de+Cuba
+
+🅿️ CÁCERES
+Parking Obispo Galarza
+📍 https://maps.google.com/?q=Parking+Obispo+Galarza+Caceres
+✔ muy cerca del casco histórico · fácil acceso autovía`},
+      {title:"📅 Sevilla — Martes 14 Julio",body:`Sevilla · Triana
+
+🏨 Triana 143 Wifi — Calle Castilla
+📍 https://maps.app.goo.gl/GuCjBvFWDjAAR3HR9
+🅿️ https://maps.google.com/?q=Parking+Mercado+de+Triana
+
+20:00 Llegada + check-in
+20:30 Paseo por Triana
+⛪ Capilla de los Marineros
+   https://maps.google.com/?q=Capilla+de+los+Marineros
+⛪ Cristo de la Expiración (El Cachorro)
+   https://maps.google.com/?q=Cristo+del+Cachorro+Sevilla
+
+🍺 21:00 Calle Betis
+   https://maps.google.com/?q=Calle+Betis+Sevilla
+
+🍽️ 21:30 Cena — María Trifulca
+   https://maps.google.com/?q=Maria+Trifulca+Sevilla
+   Reservar 5–7 días antes · Pedir terraza
+
+🍸 23:30 Bar Embarcadero
+   https://maps.google.com/?q=Bar+Embarcadero+Sevilla
+🚶 Vuelta andando al apartamento`},
+      {title:"📅 Conil — Miércoles 15 Julio · Chalet",body:`Llegada a Conil – Pinar de Roche
+Desde Sevilla: llegada 12:30–13:00
+
+12:30 Recoger llaves · instalarse
+13:30 Compra — Mercadona Conil
+     https://maps.google.com/?q=Mercadona+Conil+de+la+Frontera
+14:30 Comida tranquila
+16:00–20:00 Piscina + descanso
+
+20:30 Venta El Ancla (cervezas)
+     https://maps.google.com/?q=Venta+El+Ancla+Conil
+     ✔ terraza · ambiente local · cerca del Pinar
+
+22:00 Cena en Venta El Ancla o en el chalet
+     🍽️ pescado · fritura gaditana · carnes a la brasa`},
+      {title:"📅 Conil — Jueves 16 Julio · El Palmar",body:`10:30 Salida (Pinar de Roche)
+11:00–14:30 Cala Encendida
+     📍 https://maps.google.com/?q=Cala+Encendida+Conil
+     🅿️ https://maps.google.com/?q=Aparcamiento+Calas+de+Roche (5–10 min andando)
+     Alternativa: Cala del Pato
+
+15:00–19:30 Chalet · comida + piscina
+20:00 Salida hacia El Palmar
+     📍 https://maps.google.com/?q=Playa+del+Palmar+Cadiz
+
+20:30–22:00 Chiringuito La Torre (atardecer + copas)
+     📍 https://maps.google.com/?q=Chiringuito+La+Torre+El+Palmar
+
+✔ Claves: no madrugar · Cala Encendida o del Pato · atardecer en El Palmar imprescindible`},
+      {title:"📅 Conil — Viernes 17 Julio · Conil pueblo",body:`10:30 Salida
+11:00–14:30 Cala del Pato
+     📍 https://maps.google.com/?q=Cala+del+Pato+Conil
+     🅿️ https://maps.google.com/?q=Aparcamiento+Calas+de+Roche
+     Alternativa: Cala del Frailecillo
+
+15:00–19:30 Chalet · comida + piscina
+20:30 Salida hacia Conil
+
+21:00 Casa Manolo
+     📍 https://maps.google.com/?q=Casa+Manolo+Conil
+     • fritura gaditana · cazón en adobo · pescado fresco
+
+Después: paseo por Conil · zona centro / casco antiguo`},
+      {title:"📅 Conil — Sábado 18 Julio · El Cuartel del Mar ⭐",body:`10:30 Salida
+11:00–14:30 Playa de la Barrosa
+     📍 https://maps.google.com/?q=Playa+de+la+Barrosa
+
+15:00–19:30 Chalet · comida + piscina
+19:30 Salida hacia Cuartel del Mar
+     📍 https://maps.google.com/?q=El+Cuartel+del+Mar
+
+20:00–22:30 Atardecer + cena (RESERVADO ✅)
+     22:30 · 5 personas · Zona exterior
+
+✔ Claves: día más especial · atardecer top · cena importante del viaje`},
+      {title:"📅 Conil — Domingo 19 Julio · Vejer",body:`11:00–14:30 Playa Los Bateles
+     📍 https://maps.google.com/?q=Playa+de+los+Bateles
+     🅿️ https://maps.google.com/?q=Parking+Paseo+Maritimo+Conil
+
+15:00–19:00 Chalet · comida + piscina
+19:15 Salida hacia Vejer
+
+🅿️ Parking Los Remedios
+   📍 https://maps.google.com/?q=Parking+Los+Remedios+Vejer
+   ✔ apto Clase T · 5–10 min andando
+
+20:00–22:00 Paseo por Vejer
+   • calles blancas · miradores · Plaza de España
+
+Opciones cena:
+🍽️ El Jardín del Califa — 📞 +34 956 45 17 06
+   https://maps.google.com/?q=El+Jardin+del+Califa+Vejer
+🍽️ 4 Estaciones — 📞 +34 956 45 00 11
+   https://maps.google.com/?q=4+Estaciones+Vejer
+
+✔ Plan flexible · sin presión`},
+      {title:"📅 Conil — Lunes 20 Julio · Casa Juan",body:`11:00–14:30 Cala del Tío Juan de Medina
+     📍 https://maps.google.com/?q=Cala+del+Tio+Juan+de+Medina
+     🅿️ https://maps.google.com/?q=Aparcamiento+Calas+de+Roche
+
+15:00–19:30 Chalet · comida + piscina
+19:30 Salida hacia Zahora
+
+20:15 Atardecer — Faro de Trafalgar
+     📍 https://maps.google.com/?q=Faro+de+Trafalgar
+
+21:30 Cena — Casa Juan (RESERVAR)
+     📍 https://maps.google.com/?q=Casa+Juan+Zahora
+
+✔ Sunset + cena = combo perfecto`},
+      {title:"📅 Conil — Martes 21 Julio · Último día",body:`11:00–14:30 Playa de Castilnovo
+     📍 https://maps.google.com/?q=Playa+de+Castilnovo
+
+15:00–19:30 Chalet · comida + recoger + preparar salida
+20:30 Salida hacia Conil
+
+21:00 Cena libre
+   • repetir sitio favorito · tapeo · algo ligero
+
+Después: último paseo por Conil
+
+✔ Playa nueva · cierre especial · sin complicaciones`}
+    ]
+  },
+  {
+    name:"Bruselas 2026", dest:"Bruselas · Gante · Brujas",
+    dates:"4 al 8 Septiembre 2026", startDate:"2026-09-04",
+    cover:"https://content-viajes.nationalgeographic.com.es/medio/2025/12/05/shutterstock_d1035b54_2488933077_251205104013_1280x848.webp",
+    weatherCity:"Brussels,BE",
+    chips:["✈️ 5 días","🇧🇪 Flandes","🏛️ Brujas"],
+    notes:[
+      {title:"📅 Bruselas — Viernes 4 Septiembre",body:`16:25 ✈️ Llegada Aeropuerto Zaventem
+17:25 🚆 Tren Aeropuerto → Centro
+     🎟️ https://www.belgiantrain.be
+18:00 📍 Bruxelles-Central
+18:30 🏨 Check-in / Descanso
+19:30 🚶 Paseo Centro Histórico
+21:00 🍽️ Cena
+22:30 🍺 Delirium Café
+
+RUTA ESCÉNICA AL ALOJAMIENTO:
+1️⃣ Mont des Arts
+   https://www.google.com/maps/search/?api=1&query=Mont+des+Arts+Brussels
+2️⃣ Galeries Royales Saint-Hubert
+   https://www.google.com/maps/search/?api=1&query=Galeries+Royales+Saint-Hubert+Brussels
+3️⃣ Grand Place
+   https://www.google.com/maps/search/?api=1&query=Grand+Place+Brussels
+4️⃣ Bourse de Bruxelles
+5️⃣ Place Sainte-Catherine
+
+CENA OPCIÓN A: Fin de Siècle
+📍 Rue des Chartreux 9 (sin reservas · llegar 20:30–21:00)
+   https://www.google.com/maps/search/?api=1&query=Fin+de+Siecle+Brussels
+
+CENA OPCIÓN B: Chez Léon
+📍 Rue des Bouchers 18
+   https://www.google.com/maps/search/?api=1&query=Chez+Leon+Brussels
+
+🍺 DELIRIUM CAFÉ
+📍 Impasse de la Fidélité 4
+   https://www.google.com/maps/search/?api=1&query=Delirium+Cafe+Brussels
+
+⚠️ iPhone cargado · billete incluye Diabolo Fee`},
+      {title:"📅 Bruselas — Sábado 5 Septiembre",body:`09:00 ☕ Peck 47
+     https://www.google.com/maps/search/?api=1&query=Peck+47+Brussels
+10:00 🚶 Ruta Centro Histórico
+12:30 🍟 Frites Atelier
+     https://www.google.com/maps/search/?api=1&query=Frites+Atelier+Brussels
+13:30 🍽️ Nuetnigenough (llegar 13:15 si no reservaste)
+     https://www.google.com/maps/search/?api=1&query=Nuetnigenough+Brussels
+15:30 👑 Grand Sablon + Palacio Real
+     https://www.google.com/maps/search/?api=1&query=Grand+Sablon+Brussels
+17:30 🧇 Maison Dandoy
+     https://www.google.com/maps/search/?api=1&query=Maison+Dandoy+Brussels
+19:00 🍺 Moeder Lambic
+     https://www.google.com/maps/search/?api=1&query=Moeder+Lambic+Brussels
+21:00 🦐 Noordzee / Mer du Nord
+     https://www.google.com/maps/search/?api=1&query=Noordzee+Mer+du+Nord+Brussels
+
+🏛️ Catedral San Miguel
+   https://www.google.com/maps/search/?api=1&query=Cathedral+St+Michael+Brussels
+🌇 Mont des Arts (mejor atardecer de Bruselas)
+
+💡 Todo a pie (~8–10 km) · Pierre Marcolini en Grand Sablon`},
+      {title:"📅 Bruselas — Domingo 6 Sep · Brujas y Gante",body:`08:00 Salida alojamiento (Rue Sainte-Catherine)
+08:20 📍 Punto encuentro: Carrefour de l'Europe
+     https://www.google.com/maps/search/?api=1&query=Carrefour+de+l+Europe+Brussels
+08:30 🚌 Autobús Civitatis (confirmar hora en bono)
+
+BRUJAS (mañana + comida):
+🏛️ Grote Markt — https://www.google.com/maps/search/?api=1&query=Grote+Markt+Bruges
+🏰 Belfort de Brujas — https://www.google.com/maps/search/?api=1&query=Belfry+of+Bruges
+📸 Rozenhoedkaai (5x zoom iPhone)
+   https://www.google.com/maps/search/?api=1&query=Rozenhoedkaai+Bruges
+🏛️ Plaza Burg — https://www.google.com/maps/search/?api=1&query=Burg+Square+Bruges
+
+🥪 Tasty Bruges Sandwich Shop
+   https://www.google.com/maps/search/?api=1&query=Tasty+Bruges+Sandwich+Shop
+🧇 Chez Albert (Gofres)
+   https://www.google.com/maps/search/?api=1&query=Chez+Albert+Bruges
+
+GANTE (tarde):
+🌉 Puente de San Miguel (Modo Acción iPhone)
+   https://www.google.com/maps/search/?api=1&query=Saint+Michael+Bridge+Ghent
+🏘️ Graslei + Korenlei
+🏰 Castillo Gravensteen
+
+🍽️ Vuelta Bruselas — Cena Place Sainte-Catherine
+
+💡 Duración ~10–12h · 8–12 km caminando · calzado cómodo`},
+      {title:"📅 Bruselas — Lunes 7 Septiembre · Cierre",body:`09:00 🥞 Peck 47
+10:00 🚇 Metro L6: Sainte-Catherine → Heysel
+     💳 Apple Pay en los tornos
+10:45 🏛️ Atomium (subir al mirador nada más llegar)
+     🎟️ https://www.atomium.be
+     📍 https://maps.google.com/?q=Atomium+Brussels
+12:15 ⚽ Estadio Rey Balduino (exterior)
+     📍 https://maps.google.com/?q=King+Baudouin+Stadium+Brussels
+14:00 🍽️ Restobières
+     📍 Rue de l'Église Sainte-Catherine 9
+     https://maps.google.com/?q=Restobieres+Brussels
+     💡 Estofado a la cerveza legendario
+16:00 🎨 Ruta del Cómic:
+     📍 Tintín — https://maps.google.com/?q=Tintin+Mural+Brussels
+     📍 Lucky Luke — https://maps.google.com/?q=Lucky+Luke+Mural+Brussels
+     📍 Spirou — https://maps.google.com/?q=Spirou+Mural+Brussels
+     📍 Astérix — https://maps.google.com/?q=Asterix+Mural+Brussels
+18:00 🛍️ Grand Place + Galeries Saint-Hubert
+21:00 🥘 Gran Cena Final — Nuetnigenough
+     📍 Rue du Lombard 25 (confirmar reserva)
+     https://maps.google.com/?q=Nuetnigenough+Brussels
+
+🧇 Último gofre: Maison Dandoy (estilo Lieja)`}
+    ]
+  }
+];
+
+// ── STATE ──
+let prevScreen = 'trips';
+let currentTripIdx = 0;
+let weatherCache = {};
+
+// ── NAVIGATION ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const s = document.getElementById('screen-' + id);
+  if (s) s.classList.add('active');
+  const t = document.getElementById('tab-' + id);
+  if (t) t.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function openTrip(idx) {
+  currentTripIdx = idx;
+  prevScreen = document.querySelector('.screen.active').id.replace('screen-', '');
+  const trip = TRIPS[idx];
+
+  document.getElementById('det-img').src = trip.cover;
+  document.getElementById('det-title').textContent = trip.name;
+  document.getElementById('det-sub').textContent = '📍 ' + trip.dest + '  ·  📅 ' + trip.dates;
+  document.getElementById('det-chips').innerHTML = trip.chips.map(c =>
+    `<div class="hero-chip">${c}</div>`).join('');
+
+  const notesEl = document.getElementById('det-notes');
+  notesEl.innerHTML = trip.notes.map((n, i) => `
+    <div class="note-card" id="nc-${i}">
+      <div class="note-hd" onclick="toggleNote(${i})">
+        <h3>${n.title}</h3>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="note-body">${linkify(escHtml(n.body))}</div>
+    </div>`).join('');
+
+  // Weather for this trip
+  fetchWeather(trip.weatherCity, 'det-weather');
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-detail').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function backFromDetail() {
+  showScreen(prevScreen === 'detail' ? 'trips' : prevScreen);
+}
+
+function toggleNote(i) {
+  document.getElementById('nc-' + i).classList.toggle('open');
+}
+
+function toggleRaw(btn) {
+  const raw = btn.nextElementSibling;
+  raw.classList.toggle('open');
+  btn.innerHTML = raw.classList.contains('open')
+    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Ocultar confirmación'
+    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Ver confirmación completa';
+}
+
+// ── WEATHER ──
+async function fetchWeather(city, targetId) {
+  if (weatherCache[city]) {
+    document.getElementById(targetId).innerHTML = `<span>${weatherCache[city]}</span>`;
+    return;
+  }
+  try {
+    const r = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=%c+%t`);
+    const txt = await r.text();
+    const clean = txt.trim();
+    weatherCache[city] = clean;
+    document.getElementById(targetId).innerHTML = `<span>${clean}</span>`;
+  } catch(e) {
+    document.getElementById(targetId).innerHTML = `<span>🌤️ --</span>`;
+  }
+}
+
+// ── HOME WEATHER (Conil) ──
+async function loadHomeWeather() {
+  fetchWeather('Conil de la Frontera,ES', 'hero-weather');
+}
+
+// ── COUNTDOWN ──
+function updateCountdown() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(2026, 6, 14);
+  const diff = Math.round((target - today) / 86400000);
+  const n = document.getElementById('cd-n');
+  const badge = document.getElementById('conil-badge');
+  if (diff > 0) {
+    if (n) n.textContent = diff;
+    if (badge) badge.textContent = diff + ' días';
+    const sub = document.getElementById('home-days');
+    if (sub) sub.textContent = diff + ' días';
+  } else if (diff === 0) {
+    if (n) n.textContent = '🎉';
+    if (badge) badge.textContent = '¡Hoy!';
+  } else {
+    if (n) n.textContent = '✓';
+    if (badge) badge.textContent = 'Pasado';
+    const sub = document.getElementById('home-days');
+    if (sub) sub.textContent = 'ya pasó';
+  }
+}
+
+// ── DATE ──
+function setDate() {
+  const d = new Date();
+  const str = d.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const el = document.getElementById('today-date');
+  if (el) el.textContent = str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ── SHARE MODAL ──
+function openShareModal(type, label) {
+  const trip = TRIPS[currentTripIdx];
+  const shareUrl = window.location.href;
+  const text = type === 'trip'
+    ? `✈️ ${trip.name} · ${trip.dates}\n📍 ${trip.dest}\n\n${shareUrl}`
+    : `🎟️ ${label}\n\n${shareUrl}`;
+
+  document.getElementById('modal-title').textContent =
+    type === 'trip' ? `Compartir — ${trip.name}` : `Compartir evento`;
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="share-opt" onclick="nativeShare('${encodeURIComponent(text)}')">
+      <div class="share-ic" style="background:#E6F1FB;font-size:22px">📤</div>
+      <div class="share-text"><h3>Compartir con...</h3><p>Usa WhatsApp, Telegram, Mail...</p></div>
+    </div>
+    <div class="share-opt" onclick="copyLink('${encodeURIComponent(text)}')">
+      <div class="share-ic" style="background:#EAF3DE;font-size:22px">🔗</div>
+      <div class="share-text"><h3>Copiar enlace</h3><p>Copia la URL de la app</p></div>
+    </div>
+    <div class="share-opt" onclick="exportJSON()">
+      <div class="share-ic" style="background:#FAEEDA;font-size:22px">📂</div>
+      <div class="share-text"><h3>Exportar datos (JSON)</h3><p>Comparte los datos del viaje</p></div>
+    </div>`;
+
+  document.getElementById('modal-share').classList.add('open');
+}
+
+function closeShareModal(e) {
+  if (!e || e.target === document.getElementById('modal-share')) {
+    document.getElementById('modal-share').classList.remove('open');
+  }
+}
+
+function nativeShare(encodedText) {
+  const text = decodeURIComponent(encodedText);
+  if (navigator.share) {
+    navigator.share({ title: 'Viajes & Plans', text, url: window.location.href });
+  } else {
+    alert('Comparte esta URL: ' + window.location.href);
+  }
+  closeShareModal();
+}
+
+function copyLink(encodedText) {
+  const text = decodeURIComponent(encodedText);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert('¡Enlace copiado! 🔗');
+    });
+  } else {
+    alert('URL: ' + window.location.href);
+  }
+  closeShareModal();
+}
+
+function exportJSON() {
+  const trip = TRIPS[currentTripIdx];
+  const data = JSON.stringify({ trip, exportedAt: new Date().toISOString() }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${trip.name.replace(/\s/g,'-')}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  closeShareModal();
+}
+
+// ── UTILS ──
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function linkify(t) {
+  return t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>');
+}
+
+// ── INIT ──
+setDate();
+updateCountdown();
+loadHomeWeather();
+</script>
+</body>
+</html>
