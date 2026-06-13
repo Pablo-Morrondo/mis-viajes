@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Viajes & Plans">
+<meta name="theme-color" content="#0f0f1a">
+<title>Viajes & Plans</title>
+<style>
+:root{
+  --bg:#f2f0eb;--card:#fff;--text:#111;--text2:#5a5a5a;--text3:#9a9a9a;
+  --border:rgba(0,0,0,.07);--navy:#0f0f1a;--navy2:#1a1a2e;
+  --teal:#5DCAA5;--teal-d:#04342C;--teal-l:#E1F5EE;
+  --purple:#7F77DD;--purple-d:#26215C;--purple-l:#EEEDFE;
+  --amber:#EF9F27;--amber-d:#412402;--amber-l:#FEF3C7;
+  --blue:#3B82F6;--blue-d:#1e3a5f;--blue-l:#EFF6FF;
+  --coral:#F05A28;--coral-l:#FEF0EB;--coral-d:#5a1800;
+  --red:#EF4444;--red-l:#FEF2F2;
+  --r:20px;--r-sm:14px;
+  --safe-t:env(safe-area-inset-top,44px);
+  --safe-b:env(safe-area-inset-bottom,34px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden}
+.screen{display:none;flex-direction:column;min-height:100vh;padding-bottom:calc(76px + var(--safe-b))}
+.screen.active{display:flex}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(255,255,255,.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:.5px solid var(--border);display:flex;justify-content:space-around;padding:10px 0 calc(10px + var(--safe-b))}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 14px;cursor:pointer;min-width:56px}
+.tab svg{width:24px;height:24px;stroke:var(--text3);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.tab span{font-size:10px;color:var(--text3);transition:color .2s;font-weight:500}
+.tab.active svg{stroke:var(--blue)}
+.tab.active span{color:var(--blue)}
+.pg-hd{background:var(--card);padding:calc(var(--safe-t) + 14px) 18px 16px;border-bottom:.5px solid var(--border)}
+.pg-hd-row{display:flex;align-items:flex-end;justify-content:space-between}
+.pg-hd h1{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.pg-hd p{font-size:14px;color:var(--text2);margin-top:3px}
+.pg-add-btn{display:flex;align-items:center;gap:5px;background:var(--navy);color:#fff;border:none;border-radius:30px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
+.pg-add-btn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.home-hd{background:var(--card);padding:calc(var(--safe-t) + 14px) 18px 18px}
+.home-date{font-size:13px;color:var(--text3);margin-bottom:4px}
+.home-title{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.home-sub{font-size:14px;color:var(--text2);margin-top:4px}
+.hero-wrap{padding:14px 14px 0}
+.hero-card{border-radius:var(--r);overflow:hidden;position:relative;height:224px;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.hero-card img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-card .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.15) 55%,transparent 100%)}
+.hero-top{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start}
+.weather-pill{background:rgba(255,255,255,.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:30px;padding:5px 12px;font-size:12px;color:#fff;font-weight:500}
+.countdown-pill{background:var(--teal);border-radius:30px;padding:6px 12px;text-align:center}
+.cd-n{font-size:16px;font-weight:700;color:var(--teal-d);line-height:1}
+.cd-l{font-size:9px;color:#085041;text-transform:uppercase;letter-spacing:.4px}
+.hero-bottom{position:absolute;bottom:14px;left:14px;right:14px}
+.hero-name{font-size:24px;font-weight:700;color:#fff;letter-spacing:-.4px;line-height:1.1}
+.hero-dest{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px}
+.hero-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:20px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.9);font-weight:500}
+.no-trips-hero{background:var(--navy2);border-radius:var(--r);height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.no-trips-hero span{font-size:36px}
+.no-trips-hero p{font-size:14px;color:rgba(255,255,255,.7);font-weight:500}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 14px 0}
+.sc{border-radius:var(--r-sm);padding:14px;cursor:pointer}
+.sc.purple{background:var(--purple-l)}.sc.teal{background:var(--teal-l)}.sc.amber{background:var(--amber-l)}.sc.coral{background:var(--coral-l)}
+.sc-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.sc-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sc.purple .sc-icon{background:var(--purple)}.sc.teal .sc-icon{background:var(--teal)}.sc.amber .sc-icon{background:var(--amber)}.sc.coral .sc-icon{background:var(--coral)}
+.sc-n{font-size:26px;font-weight:700;line-height:1}
+.sc.purple .sc-n{color:var(--purple-d)}.sc.teal .sc-n{color:var(--teal-d)}.sc.amber .sc-n{color:var(--amber-d)}.sc.coral .sc-n{color:var(--coral-d)}
+.sc-l{font-size:11px;margin-top:2px;font-weight:500}
+.sc.purple .sc-l{color:var(--purple)}.sc.teal .sc-l{color:#0F6E56}.sc.amber .sc-l{color:#854F0B}.sc.coral .sc-l{color:var(--coral)}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px}
+.sec-hd h2{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.sec-hd button{font-size:13px;color:var(--blue);background:none;border:none;cursor:pointer;font-weight:500}
+.hscroll{display:flex;gap:10px;padding:0 14px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hscroll::-webkit-scrollbar{display:none}
+.tc{min-width:155px;border-radius:var(--r);overflow:hidden;flex-shrink:0;background:var(--card);box-shadow:0 2px 12px rgba(0,0,0,.08);cursor:pointer}
+.tc-img{height:100px;overflow:hidden;position:relative;background:var(--navy2)}
+.tc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.tc-badge{position:absolute;bottom:8px;left:8px;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px}
+.tc-badge.green{background:var(--teal);color:var(--teal-d)}.tc-badge.blue{background:var(--blue);color:#fff}.tc-badge.gray{background:rgba(0,0,0,.4);color:#fff}
+.tc-body{padding:9px 11px 11px}
+.tc-body h3{font-size:13px;font-weight:700}
+.tc-body p{font-size:10px;color:var(--text2);margin-top:2px}
+.tc-pills{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.pill{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px}
+.pill.blue{background:var(--blue-l);color:var(--blue-d)}.pill.teal{background:var(--teal-l);color:var(--teal-d)}.pill.amber{background:var(--amber-l);color:var(--amber-d)}.pill.purple{background:var(--purple-l);color:var(--purple-d)}
+.agenda{padding:0 14px}
+.ar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:8px;box-shadow:0 1px 6px rgba(0,0,0,.05);cursor:pointer}
+.ar-date{min-width:44px;border-radius:11px;padding:6px 4px;text-align:center;flex-shrink:0}
+.ar-date.ev{background:var(--purple-l)}.ar-date.ho{background:var(--teal-l)}.ar-date.re{background:var(--amber-l)}
+.ar-date .d{font-size:18px;font-weight:700;line-height:1}
+.ar-date .m{font-size:9px;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;font-weight:600}
+.ar-date.ev .d,.ar-date.ev .m{color:#3C3489}.ar-date.ho .d,.ar-date.ho .m{color:var(--teal-d)}.ar-date.re .d,.ar-date.re .m{color:var(--amber-d)}
+.ar-body{flex:1;min-width:0}
+.ar-body h3{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ar-body p{font-size:11px;color:var(--text2);margin-top:2px}
+.ar-tag{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.ar-tag.ev{background:var(--purple-l);color:var(--purple-d)}.ar-tag.ho{background:var(--teal-l);color:var(--teal-d)}.ar-tag.re{background:var(--amber-l);color:var(--amber-d)}
+.banner-card{border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:0 3px 16px rgba(0,0,0,.09);margin-bottom:14px}
+.banner-img{position:relative;overflow:hidden;background:var(--navy2)}
+.banner-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.banner-img.h180{height:180px}.banner-img.h160{height:160px}.banner-img.h140{height:140px}
+.banner-img.top img{object-position:top center}
+.banner-img.center img{object-position:center center}
+.banner-img.bottom img{object-position:bottom center}
+.b-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.82) 0%,rgba(0,0,0,.1) 50%,transparent 100%)}
+.b-content{position:absolute;bottom:14px;left:14px;right:14px}
+.b-tag{display:inline-block;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:7px;letter-spacing:.3px}
+.b-tag.concert{background:var(--purple);color:#fff}.b-tag.entrada{background:var(--teal);color:var(--teal-d)}.b-tag.hotel{background:var(--teal);color:var(--teal-d)}.b-tag.restaurante{background:var(--amber);color:var(--amber-d)}.b-tag.apartamento{background:var(--blue);color:#fff}.b-tag.viaje{background:rgba(255,255,255,.2);color:#fff}
+.b-title{font-size:20px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.1}
+.b-sub{font-size:12px;color:rgba(255,255,255,.72);margin-top:4px}
+.b-body{padding:13px 15px 15px}
+.b-meta{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.b-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.b-meta-item svg{width:14px;height:14px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.b-actions{display:flex;gap:8px}
+.b-btn{flex:1;padding:11px 8px;border-radius:var(--r-sm);font-size:12px;font-weight:700;text-align:center;text-decoration:none;border:none;cursor:pointer;display:block}
+.b-btn.primary{background:var(--navy);color:#fff}.b-btn.purple{background:var(--purple-l);color:var(--purple-d)}.b-btn.teal{background:var(--teal-l);color:var(--teal-d)}.b-btn.blue{background:var(--blue-l);color:var(--blue-d)}.b-btn.disabled{background:#f0f0f0;color:#aaa;pointer-events:none}
+.b-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:.5px solid var(--border)}
+.b-share-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;padding:0}
+.b-share-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.b-edit-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:0}
+.b-edit-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.det-hd{position:relative;overflow:hidden;background:var(--navy)}
+.det-hd-img{width:100%;height:220px;object-fit:cover;display:block;opacity:.55}
+.det-hd-img.top{object-position:top center}.det-hd-img.center{object-position:center}.det-hd-img.bottom{object-position:bottom center}
+.det-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--navy) 0%,transparent 65%)}
+.det-back{position:absolute;top:calc(var(--safe-t) + 12px);left:16px;display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.8);font-size:14px;cursor:pointer;background:rgba(0,0,0,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;border-radius:30px;padding:6px 12px}
+.det-back svg{width:18px;height:18px;stroke:rgba(255,255,255,.8);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.det-weather{position:absolute;top:calc(var(--safe-t) + 12px);right:16px;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:30px;padding:5px 12px;font-size:12px;color:#fff;font-weight:500}
+.det-content{position:absolute;bottom:0;left:0;right:0;padding:20px}
+.det-title{font-size:26px;font-weight:700;color:#fff;letter-spacing:-.4px}
+.det-sub{font-size:13px;color:rgba(255,255,255,.65);margin-top:3px}
+.det-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.det-actions{padding:10px 14px 0;display:flex;gap:8px;justify-content:flex-end}
+.det-action-btn{display:flex;align-items:center;gap:5px;border:none;border-radius:30px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
+.notes-wrap{padding:12px 14px 0}
+.note-card{background:var(--card);border-radius:var(--r-sm);margin-bottom:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.note-hd{padding:13px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.note-hd h3{font-size:14px;font-weight:600;flex:1;padding-right:8px;line-height:1.3}
+.note-hd-icons{display:flex;align-items:center;gap:8px}
+.note-hd svg.chevron{width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s;flex-shrink:0}
+.note-body{display:none;padding:12px 14px 14px;font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap;border-top:.5px solid var(--border)}
+.note-body a{color:var(--blue);text-decoration:none;font-weight:500}
+.note-card.open .note-body{display:block}
+.note-card.open .note-hd svg.chevron{transform:rotate(180deg)}
+.note-del-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0}
+.note-del-btn svg{width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.note-del-btn:first-child svg{stroke:var(--blue)}
+.add-note-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--card);border-radius:var(--r-sm);border:1.5px dashed var(--border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;margin-bottom:8px}
+.add-note-btn svg{width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.raw-toggle{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue);font-weight:600;background:none;border:none;cursor:pointer;margin-top:10px;padding:0}
+.raw-body{display:none;background:var(--bg);border-radius:var(--r-sm);padding:12px;margin-top:8px;font-size:12px;color:var(--text2);line-height:1.65;white-space:pre-wrap}
+.raw-body.open{display:block}
+.cal-wrap{padding:14px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-header h2{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.cal-nav{display:flex;gap:4px}
+.cal-nav button{width:32px;height:32px;border-radius:50%;border:none;background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.cal-nav button svg{width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cal-grid-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.cal-grid-header span{text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:4px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{height:44px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:14px;font-weight:500;color:var(--text)}
+.cal-day.empty{cursor:default}
+.cal-day.today{background:var(--blue);color:#fff;font-weight:700}
+.cal-day.has-event::after{content:'';position:absolute;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--purple)}
+.cal-day.has-trip{background:var(--teal-l);color:var(--teal-d)}
+.cal-day.has-trip.today{background:var(--blue);color:#fff}
+.cal-day.has-reservation::after{content:'';position:absolute;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--amber)}
+.cal-day.has-event.has-trip::after{background:var(--purple)}
+.cal-events-day{background:var(--card);border-radius:var(--r-sm);padding:12px 14px;margin-top:12px;display:none}
+.cal-events-day.show{display:block}
+.cal-ev-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.cal-ev-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.cal-ev-item:last-child{border-bottom:none}
+.cal-ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:flex-end}
+.overlay.open{display:flex}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;padding:0 0 calc(16px + var(--safe-b));width:100%;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.sheet-header{padding:16px 18px 12px;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sheet-header h2{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.sheet-close{width:30px;height:30px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2)}
+.sheet-body{padding:16px 18px;flex:1;overflow-y:auto}
+.sheet-footer{padding:12px 18px 0;border-top:.5px solid var(--border)}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:block}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:var(--r-sm);padding:12px 14px;font-size:15px;color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);background:var(--card)}
+.form-textarea{min-height:140px;resize:vertical;line-height:1.6;font-size:13px}
+.form-hint{font-size:11px;color:var(--text3);margin-top:5px}
+.img-preview-wrap{border-radius:var(--r-sm);overflow:hidden;height:140px;background:var(--bg);margin-top:8px;position:relative;display:none}
+.img-preview-wrap.show{display:block}
+.img-preview-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.img-pos-row{display:flex;gap:6px;margin-top:8px}
+.img-pos-btn{flex:1;padding:7px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--bg);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;text-align:center}
+.img-pos-btn.active{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d)}
+.form-save-btn{width:100%;padding:15px;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
+.form-delete-btn{width:100%;padding:13px;background:var(--red-l);color:var(--red);border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.type-opt{padding:12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--bg);text-align:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2)}
+.type-opt.active{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d)}
+.weather-week{padding:0 14px 4px;overflow-x:auto;display:flex;gap:8px;-webkit-overflow-scrolling:touch}
+.weather-week::-webkit-scrollbar{display:none}
+.weather-day{background:var(--card);border-radius:var(--r-sm);padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.weather-day.today{background:var(--navy);border:none}
+.weather-day-name{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
+.weather-day.today .weather-day-name{color:rgba(255,255,255,.6)}
+.weather-day-icon{font-size:22px;line-height:1}
+.weather-day-temp{font-size:14px;font-weight:700;color:var(--text)}
+.weather-day.today .weather-day-temp{color:#fff}
+.weather-day-minmax{font-size:10px;color:var(--text3);font-weight:500}
+.weather-day.today .weather-day-minmax{color:rgba(255,255,255,.5)}
+.weather-loading{padding:12px 14px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.share-opt{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:.5px solid var(--border);cursor:pointer}
+.share-opt:last-child{border-bottom:none}
+.share-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.share-text h3{font-size:15px;font-weight:600}
+.share-text p{font-size:12px;color:var(--text2);margin-top:2px}
+.reminder{background:var(--navy2);border-radius:var(--r-sm);padding:12px 14px;margin:0 14px 0;display:flex;align-items:center;gap:10px}
+.reminder-icon{font-size:24px;flex-shrink:0}
+.reminder-body h3{font-size:13px;font-weight:600;color:#fff}
+.reminder-body p{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+.search-bar{margin:12px 14px 0;background:var(--card);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.search-bar svg{width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.search-bar input{flex:1;border:none;background:none;font-size:14px;color:var(--text);outline:none;font-family:inherit}
+.search-bar input::placeholder{color:var(--text3)}
+.empty{padding:40px 20px;text-align:center;color:var(--text3)}
+.empty span{font-size:48px;display:block;margin-bottom:12px}
+.empty p{font-size:14px;line-height:1.5}
+.paste-area{background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:12px;cursor:pointer;text-align:center}
+.paste-area p{font-size:13px;color:var(--text2);font-weight:500}
+.paste-area span{font-size:11px;color:var(--text3);margin-top:3px;display:block}
+.list-sep{padding:8px 0 4px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px}
+.list-sep::after{content:'';flex:1;height:.5px;background:var(--border)}
+.trip-sel-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.trip-sel-opt{padding:7px 12px;border-radius:30px;border:1.5px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap}
+.trip-sel-opt.active{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d)}
+.linked-section{padding:4px 14px 0}
+.linked-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--r-sm);padding:10px 13px;margin-bottom:7px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.linked-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.linked-body{flex:1;min-width:0}
+.linked-body h4{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.linked-body p{font-size:11px;color:var(--text2);margin-top:2px}
+.linked-tag{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.b-btn.call{background:#E8F5E9;color:#1B5E20}
+.cal-ev-time{font-size:11px;color:var(--text3);white-space:nowrap;margin-left:auto;margin-right:8px}
+.cal-ev-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px}
+.trip-link-badge{font-size:11px;color:var(--blue);font-weight:600;margin-bottom:8px;display:block}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-hd">
+    <div class="home-date" id="today-date"></div>
+    <div class="home-title">Viajes &amp; Plans</div>
+    <div class="home-sub" id="home-sub">Cargando...</div>
+  </div>
+  <div id="checkin-banner-wrap"></div>
+  <div id="reminder-wrap" style="margin-top:12px"></div>
+  <div class="hero-wrap" id="hero-wrap">
+    <div class="no-trips-hero" onclick="openSheet('trip')"><span>🗺️</span><p>Añade tu primer viaje</p></div>
+  </div>
+  <div class="stat-grid">
+    <div class="sc purple" onclick="showScreen('events')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>
+      <div class="sc-n" id="stat-events">0</div><div class="sc-l">Eventos</div>
+    </div>
+    <div class="sc teal" onclick="showScreen('reservations')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="sc-n" id="stat-res">0</div><div class="sc-l">Reservas</div>
+    </div>
+    <div class="sc amber" onclick="showScreen('trips')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+      <div class="sc-n" id="stat-trips">0</div><div class="sc-l">Viajes</div>
+    </div>
+    <div class="sc coral" onclick="showScreen('flights')">
+      <div class="sc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div class="sc-n" id="stat-flights">0</div><div class="sc-l">Vuelos</div>
+    </div>
+  </div>
+  <div class="sec-hd"><h2>Mis viajes</h2><button onclick="showScreen('trips')">Ver todos</button></div>
+  <div class="hscroll" id="home-trips-scroll"></div>
+  <div class="sec-hd"><h2>Agenda próxima</h2><button onclick="showScreen('calendar')">Calendario</button></div>
+  <div class="agenda" id="home-agenda"></div>
+  <div style="height:8px"></div>
+</div>
+
+<!-- TRIPS -->
+<div class="screen" id="screen-trips">
+  <div class="pg-hd">
+    <div class="pg-hd-row">
+      <div><h1>Mis viajes</h1><p id="trips-count">0 viajes</p></div>
+      <button class="pg-add-btn" onclick="openSheet('trip')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo</button>
+    </div>
+  </div>
+  <div id="trips-list" style="padding:14px"></div>
+</div>
+
+<!-- TRIP DETAIL -->
+<div class="screen" id="screen-detail">
+  <div class="det-hd">
+    <img class="det-hd-img center" id="det-img" src="" alt="">
+    <div class="det-overlay"></div>
+    <button class="det-back" onclick="backFromDetail()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver
+    </button>
+    <div class="det-weather" id="det-weather">🌤️</div>
+    <div class="det-content">
+      <div class="det-title" id="det-title"></div>
+      <div class="det-sub" id="det-sub"></div>
+      <div class="det-chips" id="det-chips"></div>
+    </div>
+  </div>
+  <div id="det-week-weather" style="padding:12px 0 0"></div>
+  <div class="det-actions">
+    <button class="det-action-btn" style="background:var(--bg);color:var(--text2)" onclick="editCurrentTrip()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Editar
+    </button>
+    <button class="det-action-btn" style="background:var(--navy);color:#fff" onclick="openShareModal('trip',null)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Compartir
+    </button>
+  </div>
+  <div class="linked-section" id="det-linked"></div>
+  <div class="notes-wrap" id="det-notes"></div>
+  <div style="padding:0 14px 8px">
+    <button class="add-note-btn" onclick="openNoteSheet()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Añadir nota o día del itinerario
+    </button>
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.5;padding:0 8px">Escribe el título, pega el texto de tu nota del iPhone y los enlaces a Maps se convierten en botones automáticamente</p>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div class="screen" id="screen-events">
+  <div class="pg-hd">
+    <div class="pg-hd-row">
+      <div><h1>Eventos</h1><p id="events-count">0 eventos</p></div>
+      <button class="pg-add-btn" onclick="openSheet('event')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo</button>
+    </div>
+  </div>
+  <div id="events-list" style="padding:14px"></div>
+</div>
+
+<!-- RESERVATIONS -->
+<div class="screen" id="screen-reservations">
+  <div class="pg-hd">
+    <div class="pg-hd-row">
+      <div><h1>Reservas</h1><p id="res-count">0 reservas</p></div>
+      <button class="pg-add-btn" onclick="openSheet('reservation')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva</button>
+    </div>
+  </div>
+  <div id="res-list" style="padding:14px"></div>
+</div>
+
+<!-- CALENDAR -->
+<div class="screen" id="screen-calendar">
+  <div class="pg-hd"><h1>Calendario</h1><p>Vista mensual</p></div>
+  <div class="cal-wrap">
+    <div class="cal-header">
+      <h2 id="cal-month-label"></h2>
+      <div class="cal-nav">
+        <button onclick="calNav(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button onclick="calNav(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="cal-grid-header"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-events-day" id="cal-day-detail"></div>
+  </div>
+</div>
+
+<!-- TABBAR -->
+<nav class="tabbar">
+  <div class="tab active" id="tab-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span>
+  </div>
+  <div class="tab" id="tab-trips" onclick="showScreen('trips')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg><span>Viajes</span>
+  </div>
+  <div class="tab" id="tab-events" onclick="showScreen('events')">
+    <svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg><span>Eventos</span>
+  </div>
+  <div class="tab" id="tab-reservations" onclick="showScreen('reservations')">
+    <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><span>Reservas</span>
+  </div>
+  <div class="tab" id="tab-flights" onclick="showScreen('flights')">
+    <svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg><span>Vuelos</span>
+  </div>
+  <div class="tab" id="tab-calendar" onclick="showScreen('calendar')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Agenda</span>
+  </div>
+</nav>
+
+<!-- TRIP SHEET -->
+<div class="overlay" id="overlay-trip" onclick="closeSheetOnBg(event,'trip')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h2 id="trip-sheet-title">Nuevo viaje</h2><button class="sheet-close" onclick="closeSheet('trip')">✕</button></div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Nombre del viaje</label><input class="form-input" id="trip-name" placeholder="Ej: Conil 2026"></div>
+      <div class="form-group"><label class="form-label">Destino / Ciudad</label><input class="form-input" id="trip-dest" placeholder="Ej: Conil de la Frontera, Cádiz"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label class="form-label">Fecha inicio</label><input class="form-input" id="trip-start" type="date"></div>
+        <div class="form-group"><label class="form-label">Fecha fin</label><input class="form-input" id="trip-end" type="date"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Foto de portada (URL)</label>
+        <input class="form-input" id="trip-cover" placeholder="https://..." oninput="previewImg('trip')">
+        <div class="img-preview-wrap" id="trip-cover-preview"><img id="trip-cover-img" src="" alt=""></div>
+        <div class="img-pos-row" id="trip-pos-row" style="display:none">
+          <button class="img-pos-btn active" onclick="setPosTrip('top')">☝️ Arriba</button>
+          <button class="img-pos-btn" onclick="setPosTrip('center')">↔️ Centro</button>
+          <button class="img-pos-btn" onclick="setPosTrip('bottom')">👇 Abajo</button>
+        </div>
+        <div class="form-hint">Pega la URL de cualquier imagen de internet</div>
+      </div>
+      <div class="form-group"><label class="form-label">Ciudad para el tiempo</label><input class="form-input" id="trip-weather-city" placeholder="Ej: Cadiz,ES"><div class="form-hint">Nombre en inglés + país. Si lo dejas vacío usa el destino.</div></div>
+      <div class="form-group"><label class="form-label">Enlace carpeta Drive (opcional)</label><input class="form-input" id="trip-drive" placeholder="https://drive.google.com/..."></div>
+      <div class="form-group"><label class="form-label">Presupuesto (opcional)</label><input class="form-input" id="trip-budget" placeholder="Ej: 1.500€"></div>
+    </div>
+    <div class="sheet-footer">
+      <button class="form-save-btn" onclick="saveTrip()">Guardar viaje</button>
+      <button class="form-delete-btn" id="trip-delete-btn" onclick="deleteTrip()" style="display:none">Eliminar viaje</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE SHEET -->
+<div class="overlay" id="overlay-note" onclick="closeSheetOnBg(event,'note')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h2 id="note-sheet-title">Nueva nota</h2><button class="sheet-close" onclick="closeSheet('note')">✕</button></div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="note-title" placeholder="Ej: Martes 14 Julio · Sevilla"></div>
+      <div class="form-group">
+        <label class="form-label">Contenido</label>
+        <div class="paste-area" onclick="document.getElementById('note-body').focus()"><p>📋 Pega aquí tu nota del iPhone</p><span>Copia la nota completa con todos sus emojis y enlaces a Maps</span></div>
+        <textarea class="form-textarea" id="note-body" placeholder="Pega el texto de tu nota de iPhone aquí...&#10;&#10;Los enlaces a Maps se convertirán automáticamente en botones."></textarea>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="form-save-btn" onclick="saveNote()">Guardar nota</button>
+      <button class="form-delete-btn" id="note-delete-btn" onclick="deleteNote()" style="display:none">Eliminar nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT SHEET -->
+<div class="overlay" id="overlay-event" onclick="closeSheetOnBg(event,'event')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h2 id="event-sheet-title">Nuevo evento</h2><button class="sheet-close" onclick="closeSheet('event')">✕</button></div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <div class="type-grid" id="event-type-grid">
+          <div class="type-opt active" onclick="selectType('event','Concierto')">🎤 Concierto</div>
+          <div class="type-opt" onclick="selectType('event','Festival')">🎪 Festival</div>
+          <div class="type-opt" onclick="selectType('event','Entrada')">🎟️ Entrada</div>
+          <div class="type-opt" onclick="selectType('event','Excursión')">🚌 Excursión</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="event-name" placeholder="Ej: Aitana · Gira 2026"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" id="event-date" type="date"></div>
+        <div class="form-group"><label class="form-label">Hora (opcional)</label><input class="form-input" id="event-time" type="time"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Lugar / Ciudad</label><input class="form-input" id="event-place" placeholder="Ej: Avilés, Asturias"></div>
+      <div class="form-group">
+        <label class="form-label">Vincular a viaje (opcional)</label>
+        <div class="trip-sel-wrap" id="event-trip-sel"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Enlace a Maps</label><input class="form-input" id="event-map" placeholder="https://maps.app.goo.gl/..."></div>
+      <div class="form-group"><label class="form-label">Enlace entrada / bono</label><input class="form-input" id="event-doc" placeholder="https://..."></div>
+      <div class="form-group">
+        <label class="form-label">Imagen (URL)</label>
+        <input class="form-input" id="event-img-url" placeholder="https://..." oninput="previewImg('event')">
+        <div class="img-preview-wrap" id="event-cover-preview"><img id="event-cover-img" src="" alt=""></div>
+        <div class="img-pos-row" id="event-pos-row" style="display:none">
+          <button class="img-pos-btn" onclick="setPosEvent('top')">☝️ Arriba</button>
+          <button class="img-pos-btn active" onclick="setPosEvent('center')">↔️ Centro</button>
+          <button class="img-pos-btn" onclick="setPosEvent('bottom')">👇 Abajo</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Notas adicionales</label><textarea class="form-textarea" id="event-notes" placeholder="Información extra..." style="min-height:80px"></textarea></div>
+    </div>
+    <div class="sheet-footer">
+      <button class="form-save-btn" onclick="saveEvent()">Guardar evento</button>
+      <button class="form-delete-btn" id="event-delete-btn" onclick="deleteEvent()" style="display:none">Eliminar evento</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESERVATION SHEET -->
+<div class="overlay" id="overlay-reservation" onclick="closeSheetOnBg(event,'reservation')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h2 id="res-sheet-title">Nueva reserva</h2><button class="sheet-close" onclick="closeSheet('reservation')">✕</button></div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <div class="type-grid" id="res-type-grid">
+          <div class="type-opt active" onclick="selectType('res','Hotel')">🏨 Hotel</div>
+          <div class="type-opt" onclick="selectType('res','Restaurante')">🍽️ Restaurante</div>
+          <div class="type-opt" onclick="selectType('res','Apartamento')">🏠 Apartamento</div>
+          <div class="type-opt" onclick="selectType('res','Transporte')">🚗 Transporte</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="res-name" placeholder="Ej: El Cuartel del Mar"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" id="res-date" type="date"></div>
+        <div class="form-group"><label class="form-label">Hora</label><input class="form-input" id="res-time" type="time"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Personas</label><input class="form-input" id="res-people" type="number" placeholder="Ej: 5" min="1"></div>
+      <div class="form-group"><label class="form-label">Localizador / Referencia</label><input class="form-input" id="res-locator" placeholder="Ej: PM-8821"></div>
+      <div class="form-group"><label class="form-label">Teléfono (opcional)</label><input class="form-input" id="res-phone" type="tel" placeholder="Ej: +34 956 064 433"></div>
+      <div class="form-group">
+        <label class="form-label">Vincular a viaje (opcional)</label>
+        <div class="trip-sel-wrap" id="res-trip-sel"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Enlace a Maps</label><input class="form-input" id="res-map" placeholder="https://maps.app.goo.gl/..."></div>
+      <div class="form-group"><label class="form-label">Enlace documento (Drive/PDF)</label><input class="form-input" id="res-doc" placeholder="https://drive.google.com/..."></div>
+      <div class="form-group">
+        <label class="form-label">Imagen (URL)</label>
+        <input class="form-input" id="res-img-url" placeholder="https://..." oninput="previewImg('res')">
+        <div class="img-preview-wrap" id="res-cover-preview"><img id="res-cover-img" src="" alt=""></div>
+        <div class="img-pos-row" id="res-pos-row" style="display:none">
+          <button class="img-pos-btn" onclick="setPosRes('top')">☝️ Arriba</button>
+          <button class="img-pos-btn active" onclick="setPosRes('center')">↔️ Centro</button>
+          <button class="img-pos-btn" onclick="setPosRes('bottom')">👇 Abajo</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Confirmación / Email (opcional)</label><textarea class="form-textarea" id="res-raw" placeholder="Pega aquí el email de confirmación..." style="min-height:100px"></textarea></div>
+    </div>
+    <div class="sheet-footer">
+      <button class="form-save-btn" onclick="saveReservation()">Guardar reserva</button>
+      <button class="form-delete-btn" id="res-delete-btn" onclick="deleteReservation()" style="display:none">Eliminar reserva</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLIGHTS SCREEN -->
+<div class="screen" id="screen-flights">
+  <div class="pg-hd"><div class="pg-hd-row"><div><h1>Vuelos</h1><p>Próximamente</p></div></div></div>
+  <div style="padding:40px 20px;text-align:center;color:var(--text3)"><span style="font-size:48px;display:block;margin-bottom:12px">✈️</span><p style="font-size:14px">Módulo de vuelos próximamente</p></div>
+</div>
+
+<!-- SHARE OVERLAY -->
+<div class="overlay" id="overlay-share" onclick="closeSheetOnBg(event,'share')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h2 id="share-title">Compartir</h2><button class="sheet-close" onclick="closeSheet('share')">✕</button></div>
+    <div class="sheet-body" id="share-body"></div>
+  </div>
+</div>
+
+<!-- IMPORT OVERLAY -->
+<div class="overlay" id="overlay-import" onclick="closeSheetOnBg(event,'import')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h2>Importar datos</h2><button class="sheet-close" onclick="closeSheet('import')">✕</button></div>
+    <div class="sheet-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Pega aquí el JSON exportado desde otra instalación de la app.</p>
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Modo de importación</div>
+        <label style="display:flex;align-items:flex-start;gap:10px;background:var(--bg);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;cursor:pointer">
+          <input type="radio" name="import-mode" value="replace" checked style="margin-top:2px;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Reemplazar todo</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Sustituye todos los datos actuales con los del archivo. Úsalo para sincronizar desde el Mac al iPhone.</div></div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;background:var(--bg);border-radius:var(--r-sm);padding:12px;cursor:pointer">
+          <input type="radio" name="import-mode" value="merge" style="margin-top:2px;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Fusionar</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Añade los datos nuevos y actualiza los existentes. No borra nada.</div></div>
+        </label>
+      </div>
+      <textarea class="form-textarea" id="import-json" placeholder='{"trips":[...],"events":[...],"reservations":[...]}' style="min-height:160px;font-size:12px;font-family:monospace"></textarea>
+    </div>
+    <div class="sheet-footer"><button class="form-save-btn" onclick="importData()">Importar</button></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+// DATA LAYER — localStorage con protección anti-seed
+// ════════════════════════════════
+const STORE = 'vp3_data';
+let DB = load();
+
+// FIX 1: load() con validación robusta
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          trips: Array.isArray(parsed.trips) ? parsed.trips : [],
+          events: Array.isArray(parsed.events) ? parsed.events : [],
+          reservations: Array.isArray(parsed.reservations) ? parsed.reservations : [],
+          flights: Array.isArray(parsed.flights) ? parsed.flights : []
+        };
+      }
+    }
+  } catch(e) { console.warn('Error cargando DB:', e); }
+  return { trips:[], events:[], reservations:[], flights:[] };
+}
+
+// FIX 2: save() marca que hay datos reales guardados
+function save() {
+  localStorage.setItem(STORE, JSON.stringify(DB));
+  localStorage.setItem('vp3_seeded', '1');
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+// FIX 3: seedIfEmpty() con marca permanente — NUNCA sobreescribe datos reales
+function seedIfEmpty() {
+  if (localStorage.getItem('vp3_seeded')) return;
+  if (DB.trips.length > 0) { localStorage.setItem('vp3_seeded','1'); return; }
+  DB.trips = [
+    { id:'t1', name:'Conil 2026', dest:'Sevilla \u00b7 Conil de la Frontera', startDate:'2026-07-14', endDate:'2026-07-21',
+      cover:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80',
+      coverPos:'center', drive:'', budget:'', weatherCity:'Conil de la Frontera,ES',
+      notes:[
+        {id:'n1',title:'\uD83C\uDD7F\uFE0F Parkings Sevilla y C\u00e1ceres',body:'\uD83C\uDD7F\uFE0F SEVILLA (Triana)\n\nParking Mercado de Triana\n\uD83D\uDCCD https://maps.google.com/?q=Parking+Mercado+de+Triana\n\u2714 2\u20133 min del Puente de Triana \u00b7 apto Mercedes Clase T\n\nAlternativa: Parking Plaza de Cuba\n\uD83D\uDCCD https://maps.google.com/?q=Parking+Plaza+de+Cuba\n\n\uD83C\uDD7F\uFE0F C\u00c1CERES\nParking Obispo Galarza\n\uD83D\uDCCD https://maps.google.com/?q=Parking+Obispo+Galarza+Caceres\n\u2714 muy cerca del casco hist\u00f3rico'},
+        {id:'n2',title:'\uD83D\uDCC5 Sevilla \u2014 Martes 14 Julio',body:'\uD83C\uDFE8 Triana 143 Wifi \u2014 Calle Castilla\n\uD83D\uDCCD https://maps.app.goo.gl/GuCjBvFWDjAAR3HR9\n\uD83C\uDD7F\uFE0F https://maps.google.com/?q=Parking+Mercado+de+Triana\n\n20:00 Llegada + check-in\n20:30 Paseo por Triana\n\u26EA Capilla de los Marineros\n   https://maps.google.com/?q=Capilla+de+los+Marineros\n\uD83C\uDF7A 21:00 Calle Betis\n   https://maps.google.com/?q=Calle+Betis+Sevilla\n\uD83C\uDF7D\uFE0F 21:30 Mar\u00eda Trifulca\n   https://maps.google.com/?q=Maria+Trifulca+Sevilla\n   Reservar 5\u20137 d\u00edas antes \u00b7 Pedir terraza\n\uD83C\uDF78 23:30 Bar Embarcadero\n   https://maps.google.com/?q=Bar+Embarcadero+Sevilla'},
+        {id:'n3',title:'\uD83D\uDCC5 Conil \u2014 Mi\u00e9rcoles 15 Julio \u00b7 Chalet',body:'Llegada desde Sevilla: 12:30\u201313:00\n\n12:30 Recoger llaves \u00b7 instalarse\n13:30 Mercadona Conil\n     https://maps.google.com/?q=Mercadona+Conil+de+la+Frontera\n14:30 Comida tranquila\n16:00\u201320:00 Piscina + descanso\n\n20:30 Venta El Ancla\n     https://maps.google.com/?q=Venta+El+Ancla+Conil\n22:00 Cena en chalet o Venta El Ancla'},
+        {id:'n4',title:'\uD83D\uDCC5 Conil \u2014 Jueves 16 \u00b7 El Palmar',body:'11:00\u201314:30 Cala Encendida\n\uD83D\uDCCD https://maps.google.com/?q=Cala+Encendida+Conil\n\uD83C\uDD7F\uFE0F https://maps.google.com/?q=Aparcamiento+Calas+de+Roche\n\n15:00\u201319:30 Chalet \u00b7 piscina\n20:00 El Palmar\n\uD83D\uDCCD https://maps.google.com/?q=Playa+del+Palmar+Cadiz\n\n20:30 Chiringuito La Torre\n\uD83D\uDCCD https://maps.google.com/?q=Chiringuito+La+Torre+El+Palmar'},
+        {id:'n5',title:'\uD83D\uDCC5 Conil \u2014 Viernes 17 \u00b7 Conil pueblo',body:'11:00\u201314:30 Cala del Pato\n\uD83D\uDCCD https://maps.google.com/?q=Cala+del+Pato+Conil\n\n15:00\u201319:30 Chalet \u00b7 piscina\n21:00 Casa Manolo\n\uD83D\uDCCD https://maps.google.com/?q=Casa+Manolo+Conil\n\u2022 fritura gaditana \u00b7 caz\u00f3n en adobo\nDespu\u00e9s: paseo por Conil'},
+        {id:'n6',title:'\uD83D\uDCC5 Conil \u2014 S\u00e1bado 18 \u00b7 El Cuartel del Mar \u2b50',body:'11:00\u201314:30 Playa de la Barrosa\n\uD83D\uDCCD https://maps.google.com/?q=Playa+de+la+Barrosa\n\n19:30 Salida hacia Cuartel del Mar\n\uD83D\uDCCD https://maps.google.com/?q=El+Cuartel+del+Mar\n\n20:00 Atardecer + cena RESERVADO \u2705\n22:30 \u00b7 5 personas \u00b7 Zona exterior'},
+        {id:'n7',title:'\uD83D\uDCC5 Conil \u2014 Domingo 19 \u00b7 Vejer',body:'11:00\u201314:30 Playa Los Bateles\n\uD83D\uDCCD https://maps.google.com/?q=Playa+de+los+Bateles\n\n19:15 Salida hacia Vejer\n\uD83C\uDD7F\uFE0F Parking Los Remedios\n\uD83D\uDCCD https://maps.google.com/?q=Parking+Los+Remedios+Vejer\n\n20:00 Paseo por Vejer \u00b7 calles blancas \u00b7 miradores\n\nCena:\n\uD83C\uDF7D\uFE0F El Jard\u00edn del Califa \u00b7 \uD83D\uDCDE +34 956 45 17 06\n   https://maps.google.com/?q=El+Jardin+del+Califa+Vejer\n\uD83C\uDF7D\uFE0F 4 Estaciones \u00b7 \uD83D\uDCDE +34 956 45 00 11'},
+        {id:'n8',title:'\uD83D\uDCC5 Conil \u2014 Lunes 20 \u00b7 Casa Juan',body:'11:00\u201314:30 Cala del T\u00edo Juan de Medina\n\uD83D\uDCCD https://maps.google.com/?q=Cala+del+Tio+Juan+de+Medina\n\n20:15 Faro de Trafalgar\n\uD83D\uDCCD https://maps.google.com/?q=Faro+de+Trafalgar\n\n21:30 Casa Juan (RESERVAR)\n\uD83D\uDCCD https://maps.google.com/?q=Casa+Juan+Zahora'},
+        {id:'n9',title:'\uD83D\uDCC5 Conil \u2014 Martes 21 \u00b7 \u00daltimo d\u00eda',body:'11:00\u201314:30 Playa de Castilnovo\n\uD83D\uDCCD https://maps.google.com/?q=Playa+de+Castilnovo\n\n15:00 Chalet \u00b7 recoger + preparar salida\n20:30 Salida hacia Conil \u00b7 cena libre\nDespu\u00e9s: \u00faltimo paseo por Conil'}
+      ]
+    },
+    { id:'t2', name:'Bruselas 2026', dest:'Bruselas \u00b7 Gante \u00b7 Brujas', startDate:'2026-09-04', endDate:'2026-09-08',
+      cover:'https://images.unsplash.com/photo-1559113202-c916b8e44373?w=900&q=80',
+      coverPos:'center', drive:'', budget:'', weatherCity:'Brussels,BE',
+      notes:[
+        {id:'nb1',title:'\uD83D\uDCC5 Bruselas \u2014 Viernes 4 Septiembre',body:'16:25 \u2708\uFE0F Llegada Zaventem\n17:25 \uD83D\uDE86 Tren \u2192 Centro\n   https://www.belgiantrain.be\n18:00 Bruxelles-Central\n18:30 Check-in\n\nRUTA AL ALOJAMIENTO:\n1\uFE0F\u20E3 Mont des Arts\n   https://www.google.com/maps/search/?api=1&query=Mont+des+Arts+Brussels\n2\uFE0F\u20E3 Galeries Royales Saint-Hubert\n3\uFE0F\u20E3 Grand Place\n   https://www.google.com/maps/search/?api=1&query=Grand+Place+Brussels\n\nCENA: Fin de Si\u00e8cle (sin reservas, llegar 20:30)\n\uD83D\uDCCD https://www.google.com/maps/search/?api=1&query=Fin+de+Siecle+Brussels\n\n\uD83C\uDF7A Delirium Caf\u00e9\n\uD83D\uDCCD https://www.google.com/maps/search/?api=1&query=Delirium+Cafe+Brussels'},
+        {id:'nb2',title:'\uD83D\uDCC5 Bruselas \u2014 S\u00e1bado 5 Septiembre',body:'09:00 \u2615 Peck 47\n   https://www.google.com/maps/search/?api=1&query=Peck+47+Brussels\n12:30 \uD83C\uDF5F Frites Atelier\n13:30 \uD83C\uDF7D\uFE0F Nuetnigenough (llegar 13:15)\n   https://www.google.com/maps/search/?api=1&query=Nuetnigenough+Brussels\n15:30 Grand Sablon + Palacio Real\n   https://www.google.com/maps/search/?api=1&query=Grand+Sablon+Brussels\n17:30 \uD83E\uDEC7 Maison Dandoy\n19:00 \uD83C\uDF7A Moeder Lambic\n21:00 \uD83E\uDD90 Noordzee / Mer du Nord'},
+        {id:'nb3',title:'\uD83D\uDCC5 Bruselas \u2014 Domingo 6 \u00b7 Brujas y Gante',body:"08:00 Salida\n08:20 \uD83D\uDCCD Carrefour de l'Europe (punto encuentro)\n   https://www.google.com/maps/search/?api=1&query=Carrefour+de+l+Europe+Brussels\n08:30 \uD83D\uDE8C Autob\u00fas Civitatis\n\nBRUJAS:\n\uD83D\uDCF8 Rozenhoedkaai (zoom 5x iPhone)\n   https://www.google.com/maps/search/?api=1&query=Rozenhoedkaai+Bruges\n\uD83C\uDFF0 Belfort\n   https://www.google.com/maps/search/?api=1&query=Belfry+of+Bruges\n\nGANTE:\n\uD83C\uDF09 Puente San Miguel (Modo Acci\u00f3n iPhone)\n   https://www.google.com/maps/search/?api=1&query=Saint+Michael+Bridge+Ghent\n\uD83C\uDFF0 Castillo Gravensteen"},
+        {id:'nb4',title:'\uD83D\uDCC5 Bruselas \u2014 Lunes 7 \u00b7 Cierre',body:'10:00 \uD83D\uDE87 Metro L6: Sainte-Catherine \u2192 Heysel\n10:45 \uD83C\uDFDB\uFE0F Atomium (subir al mirador nada m\u00e1s llegar)\n   \uD83C\uDFAB https://www.atomium.be\n   \uD83D\uDCCD https://maps.google.com/?q=Atomium+Brussels\n14:00 \uD83C\uDF7D\uFE0F Restobières\n   \uD83D\uDCCD https://maps.google.com/?q=Restobieres+Brussels\n16:00 \uD83C\uDFA8 Ruta del C\u00f3mic:\n   \uD83D\uDCCD Tint\u00edn https://maps.google.com/?q=Tintin+Mural+Brussels\n   \uD83D\uDCCD Lucky Luke\n   \uD83D\uDCCD Spirou\n21:00 \uD83E\uDD58 Nuetnigenough\n   \uD83D\uDCCD https://maps.google.com/?q=Nuetnigenough+Brussels'}
+      ]
+    }
+  ];
+  DB.events = [
+    { id:'e1', type:'Concierto', name:'Aitana', date:'2026-07-25', time:'', place:'Avil\u00e9s, Asturias',
+      map:'https://maps.app.goo.gl/xzWVNvzkryAdAQv27?g_st=ic',
+      doc:'https://venta.enterticket.es/entradas?data=eyJvcmRlciI6IjQ1NTU2Y2RkMFdNUCIsImhhc2giOiJCRDQ0NTg5MkFERDhEOTZFNzY1RkQ2Q0VBOTZEQzhFNDEzMTUyNzBEM0M0ODgzNDVFQkMyRDA3NEQ4MkRFRDNGIn0%3D&dest=I&lang=es_ES',
+      image:'https://mallorcalivefestival.com/wp-content/uploads/2025/10/aitana-imagen-web.jpg', imagePos:'top', notes:'' },
+    { id:'e2', type:'Concierto', name:'Pet Shop Boys', date:'2026-07-25', time:'', place:'Santander',
+      map:'https://maps.app.goo.gl/W4L4krXAbMzWeE697',
+      doc:'https://checkoutentradas.elcorteingles.es/open/wdist/checkout/tickets/es/0qCZTbdJYj6M6pDMfxi9Iw%3D%3D?email=5dnI_O3qaoeQWg7K0iW_yyxL6UEAAMEubTxczsQdBHE=',
+      image:'https://festivalea.es/wp-content/uploads/2026/03/Pet-Shop-Boys.jpg', imagePos:'top', notes:'' },
+    { id:'e3', type:'Entrada', name:'Excursi\u00f3n Gante y Brujas', date:'2026-09-06', time:'08:30', place:'Grand Place, Bruselas',
+      map:'https://maps.app.goo.gl/rRpCc3hikbrqiF86A?g_st=ic',
+      doc:'https://voucher.civitatis.com/voucher/UjFKUjF6M09ZbVhxOE53MVZSUGc5UT09OjozaXFVQzJXd3NM/ajh3eXlERkpYUG9mL3pEWnFadUZuUT09OjozaXFVQzJXd3NM/1',
+      image:'https://www.civitatis.com/f/belgica/bruselas/guia/brujas-m.jpg', imagePos:'center', notes:'' }
+  ];
+  DB.reservations = [
+    { id:'r1', type:'Hotel', name:'Sevilla \u00b7 Triana 143 Wifi', date:'2026-07-14', time:'20:00', people:'', locator:'',
+      map:'https://maps.app.goo.gl/qU3UvLtNUfGditB48?g_st=ic',
+      doc:'https://drive.google.com/file/d/1vkwucDAyJn49v2YvcfX7mzuzg042ZzNA/view?usp=drivesdk',
+      image:'https://cf.bstatic.com/xdata/images/hotel/max1024x768/315205288.jpg?k=311e42fcb6ae2c2b3f4e980bb1ca9dc2b9a97818d918f9b8545422ed373f8177&o=',
+      imagePos:'center', raw:'' },
+    { id:'r2', type:'Restaurante', name:'Mar\u00eda Trifulca', date:'2026-07-14', time:'21:30', people:'', locator:'',
+      map:'https://maps.app.goo.gl/5g9XN5ePaUPG7bTr5', doc:'',
+      image:'https://www.therooftopguide.com/rooftop-bars-in-seville/Bilder/mariatrifulca-600-1.jpg',
+      imagePos:'center', raw:'Reservar 5\u20137 d\u00edas antes \u00b7 Pedir terraza' },
+    { id:'r3', type:'Restaurante', name:'El Cuartel del Mar', date:'2026-07-18', time:'22:30', people:'5', locator:'',
+      map:'https://maps.app.goo.gl/wHs8YBcMCuAskaeG6', doc:'',
+      image:'https://phantom-elmundo.unidadeditorial.es/1a951841386bb7d5f62d2207be624bac/crop/0x0/3072x2048/resize/746/f/webp/assets/multimedia/imagenes/2021/07/19/16266846356258.jpg',
+      imagePos:'center',
+      raw:'Fecha: 18/07/2026 \u00b7 Hora: 22:30 \u00b7 5 personas \u00b7 ZONA EXTERIOR\nDuraci\u00f3n: 1h 45min \u00b7 +10% en zona exterior\nCancelaci\u00f3n <12h \u2192 20\u20ac/comensal\n\uD83D\uDCDE (34) 956 064 433 \u00b7 info@elcuarteldelmar.com\nC. Bajada de la Torre del Puerco s/n, Chiclana 11130 C\u00e1diz' }
+  ];
+  save();
+}
+
+// ════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════
+let prevScreen = 'trips';
+let currentTripId = null;
+let editingNoteId = null;
+let editingTripId = null;
+let editingEventId = null;
+let editingResId = null;
+let weatherCache = {};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const s = document.getElementById('screen-' + id);
+  if (s) { s.classList.add('active'); }
+  const t = document.getElementById('tab-' + id);
+  if (t) t.classList.add('active');
+  window.scrollTo(0,0);
+  if (id === 'home') renderHome();
+  if (id === 'trips') renderTrips();
+  if (id === 'events') renderEvents();
+  if (id === 'reservations') renderReservations();
+  if (id === 'calendar') renderCalendar();
+  if (id === 'flights') renderFlights();
+}
+
+function backFromDetail() {
+  showScreen(prevScreen === 'detail' ? 'trips' : prevScreen);
+}
+
+function renderHome() {
+  const d = new Date();
+  const ds = d.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('today-date').textContent = ds.charAt(0).toUpperCase()+ds.slice(1);
+  document.getElementById('stat-events').textContent = DB.events.length;
+  document.getElementById('stat-res').textContent = DB.reservations.length;
+  document.getElementById('stat-trips').textContent = DB.trips.length;
+  document.getElementById('stat-flights').textContent = (DB.flights||[]).length;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = DB.trips.filter(t=>new Date(t.startDate)>=today).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
+  const nextTrip = upcoming[0] || DB.trips[0];
+  const sub = document.getElementById('home-sub');
+  if (nextTrip) {
+    const diff = Math.round((new Date(nextTrip.startDate)-today)/86400000);
+    sub.innerHTML = diff>0 ? `Pr\u00f3ximo: <strong>${nextTrip.name}</strong> en ${diff} d\u00edas` : diff===0 ? `\u00a1Hoy empieza <strong>${nextTrip.name}</strong>! \uD83C\uDF89` : `\u00daltimo viaje: <strong>${nextTrip.name}</strong>`;
+  } else { sub.textContent = 'Sin viajes planificados a\u00fan'; }
+  const remEl = document.getElementById('reminder-wrap');
+  const soonEv = [...DB.events,...DB.reservations].filter(e=>{
+    const dd = Math.round((new Date(e.date)-today)/86400000);
+    return dd>=0&&dd<=3;
+  }).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if (soonEv.length) {
+    const ev = soonEv[0];
+    const diff = Math.round((new Date(ev.date)-today)/86400000);
+    const when = diff===0?'Hoy':diff===1?'Ma\u00f1ana':`En ${diff} d\u00edas`;
+    remEl.innerHTML = `<div class="reminder" style="margin-bottom:0"><div class="reminder-icon">\uD83D\uDD14</div><div class="reminder-body"><h3>${when}: ${ev.name}</h3><p>${ev.place||ev.type||''}${ev.time?' \u00b7 '+ev.time:''}</p></div></div>`;
+    remEl.style.marginBottom='12px';
+  } else { remEl.innerHTML=''; remEl.style.marginBottom='0'; }
+  const heroWrap = document.getElementById('hero-wrap');
+  if (nextTrip) {
+    const diff2 = Math.round((new Date(nextTrip.startDate)-today)/86400000);
+    const cdHtml = diff2>0
+      ? `<div class="countdown-pill"><div class="cd-n">${diff2}</div><div class="cd-l">d\u00edas</div></div>`
+      : diff2===0 ? `<div class="countdown-pill"><div class="cd-n">\uD83C\uDF89</div><div class="cd-l">\u00a1hoy!</div></div>` : '';
+    heroWrap.innerHTML = `
+      <div class="hero-card" onclick="openTrip('${nextTrip.id}')">
+        <div style="position:absolute;inset:0;background-image:url('${nextTrip.cover}');background-size:cover;background-position:${nextTrip.coverPos||'center'};"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-top">
+          <div class="weather-pill" id="home-weather">\uD83C\uDF24\uFE0F cargando...</div>
+          ${cdHtml}
+        </div>
+        <div class="hero-bottom">
+          <div class="hero-name">${nextTrip.name}</div>
+          <div class="hero-dest">\uD83D\uDCCD ${nextTrip.dest}</div>
+          <div class="hero-chips">
+            <div class="hero-chip">\uD83D\uDCC5 ${fmtDateRange(nextTrip.startDate,nextTrip.endDate)}</div>
+            <div class="hero-chip">\uD83D\uDCDD ${(nextTrip.notes||[]).length} notas</div>
+          </div>
+        </div>
+      </div>`;
+    fetchWeather(nextTrip.weatherCity||nextTrip.dest,'home-weather');
+  } else {
+    heroWrap.innerHTML = `<div class="no-trips-hero" onclick="openSheet('trip')"><span>\uD83D\uDDFA\uFE0F</span><p>A\u00f1ade tu primer viaje</p></div>`;
+  }
+  const sc = document.getElementById('home-trips-scroll');
+  if (!DB.trips.length) { sc.innerHTML=`<div style="padding:0 4px;color:var(--text3);font-size:13px">Sin viajes a\u00fan</div>`; }
+  else {
+    sc.innerHTML = DB.trips.map(t=>{
+      const diff = Math.round((new Date(t.startDate)-today)/86400000);
+      const badge = diff>0?`<span class="tc-badge green">${diff} d\u00edas</span>`:diff===0?`<span class="tc-badge green">\u00a1Hoy!</span>`:`<span class="tc-badge gray">Pasado</span>`;
+      return `<div class="tc" onclick="openTrip('${t.id}')">
+        <div class="tc-img"><img src="${t.cover}" alt="${t.name}" style="object-position:${t.coverPos||'center'}" onerror="this.style.display='none'">${badge}</div>
+        <div class="tc-body"><h3>${t.name}</h3><p>${fmtDateRange(t.startDate,t.endDate)}</p><div class="tc-pills"><span class="pill teal">${(t.notes||[]).length} notas</span></div></div>
+      </div>`;
+    }).join('');
+  }
+  const agEl = document.getElementById('home-agenda');
+  const allItems = [
+    ...DB.events.map(e=>({...e,_kind:'ev'})),
+    ...DB.reservations.map(r=>({...r,_kind:'re'}))
+  ].filter(i=>new Date(i.date)>=today).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,6);
+  if (!allItems.length) { agEl.innerHTML=`<div style="padding:0 4px 12px;color:var(--text3);font-size:13px">Sin eventos pr\u00f3ximos</div>`; return; }
+  agEl.innerHTML = allItems.map(i=>{
+    const dt = new Date(i.date+'T00:00:00');
+    const day = dt.getDate();
+    const mon = dt.toLocaleDateString('es-ES',{month:'short'}).replace('.','');
+    const tag = i._kind==='ev'?'ev':i.type==='Hotel'||i.type==='Apartamento'?'ho':'re';
+    const tagLabel = i._kind==='ev'?i.type:i.type;
+    const screen = i._kind==='ev'?'events':'reservations';
+    return `<div class="ar" onclick="showScreen('${screen}')">
+      <div class="ar-date ${tag}"><div class="d">${day}</div><div class="m">${mon}</div></div>
+      <div class="ar-body"><h3>${i.name}</h3><p>${i.place||''}${i.time?' \u00b7 '+i.time:''}</p></div>
+      <span class="ar-tag ${tag}">${tagLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTrips() {
+  const el = document.getElementById('trips-list');
+  document.getElementById('trips-count').textContent = `${DB.trips.length} viaje${DB.trips.length!==1?'s':''}`;
+  if (!DB.trips.length) { el.innerHTML=`<div class="empty"><span>\uD83D\uDDFA\uFE0F</span><p>A\u00fan no tienes viajes.<br>Pulsa "Nuevo" para a\u00f1adir uno.</p></div>`; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  el.innerHTML = DB.trips.map(t=>{
+    const diff = Math.round((new Date(t.startDate)-today)/86400000);
+    const statusPill = diff>0?`<span class="pill blue">En ${diff} d\u00edas</span>`:diff===0?`<span class="pill teal">\u00a1Hoy!</span>`:`<span class="pill amber">Pasado</span>`;
+    return `<div class="banner-card">
+      <div class="banner-img h180 ${t.coverPos||'center'}">
+        <img src="${t.cover||''}" alt="${t.name}" onerror="this.style.opacity='.15'">
+        <div class="b-overlay"></div>
+        <div class="b-content">
+          <div class="b-tag viaje">Viaje</div>
+          <div class="b-title">${t.name}</div>
+          <div class="b-sub">\uD83D\uDCCD ${t.dest}</div>
+        </div>
+      </div>
+      <div class="b-body">
+        <div class="b-meta">
+          <div class="b-meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${fmtDateRange(t.startDate,t.endDate)}</div>
+          <div class="b-meta-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${(t.notes||[]).length} notas</div>
+        </div>
+        <div class="b-actions"><button class="b-btn primary" onclick="openTrip('${t.id}')">Ver itinerario</button></div>
+        <div class="b-footer">
+          <div style="display:flex;gap:6px">${statusPill}</div>
+          <div style="display:flex;gap:10px">
+            <button class="b-edit-btn" onclick="editTrip('${t.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+            <button class="b-share-btn" onclick="openShareModal('trip','${t.id}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openTrip(id) {
+  const trip = DB.trips.find(t=>t.id===id);
+  if (!trip) return;
+  currentTripId = id;
+  prevScreen = document.querySelector('.screen.active').id.replace('screen-','');
+  const img = document.getElementById('det-img');
+  img.src = trip.cover||'';
+  img.className = 'det-hd-img ' + (trip.coverPos||'center');
+  document.getElementById('det-title').textContent = trip.name;
+  document.getElementById('det-sub').textContent = '\uD83D\uDCCD '+trip.dest+' \u00b7 \uD83D\uDCC5 '+fmtDateRange(trip.startDate,trip.endDate);
+  document.getElementById('det-chips').innerHTML = [
+    trip.budget?`<div class="hero-chip">\uD83D\uDCB0 ${trip.budget}</div>`:'',
+    trip.drive?`<div class="hero-chip" onclick="window.open('${trip.drive}','_blank')" style="cursor:pointer">\uD83D\uDCC2 Drive</div>`:''
+  ].join('');
+  renderLinkedItems(id);
+  renderNotes(trip);
+  fetchWeather(trip.weatherCity||trip.dest,'det-weather');
+  fetchWeekWeather(trip.weatherCity||trip.dest,'det-week-weather');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-detail').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function renderNotes(trip) {
+  const el = document.getElementById('det-notes');
+  if (!trip.notes||!trip.notes.length) { el.innerHTML=''; return; }
+  el.innerHTML = trip.notes.map((n,i)=>`
+    <div class="note-card" id="nc-${n.id}">
+      <div class="note-hd" onclick="toggleNote('${n.id}')">
+        <h3>${n.title}</h3>
+        <div class="note-hd-icons">
+          <button class="note-del-btn" onclick="event.stopPropagation();openNoteSheet('${n.id}')" title="Editar"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="note-del-btn" onclick="event.stopPropagation();confirmDeleteNote('${n.id}')" title="Eliminar"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="note-body">${linkify(escHtml(n.body))}</div>
+    </div>`).join('');
+}
+
+function toggleNote(id) { document.getElementById('nc-'+id)?.classList.toggle('open'); }
+
+function confirmDeleteNote(noteId) {
+  if (confirm('\u00bfEliminar esta nota?')) {
+    const trip = DB.trips.find(t=>t.id===currentTripId);
+    if (!trip) return;
+    trip.notes = trip.notes.filter(n=>n.id!==noteId);
+    save(); renderNotes(trip);
+  }
+}
+
+function getTripName(tripId){const t=DB.trips.find(t=>t.id===tripId);return t?t.name:'';}
+
+function renderEvents() {
+  const el = document.getElementById('events-list');
+  document.getElementById('events-count').textContent = `${DB.events.length} evento${DB.events.length!==1?'s':''}`;
+  if (!DB.events.length) { el.innerHTML=`<div class="empty"><span>\uD83C\uDFDF\uFE0F</span><p>Sin eventos a\u00fan.<br>A\u00f1ade conciertos, festivales, excursiones...</p></div>`; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sorted = [...DB.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming = sorted.filter(e=>new Date(e.date)>=today);
+  const past = sorted.filter(e=>new Date(e.date)<today).reverse();
+  let html='';
+  if(upcoming.length){html+=`<div class="list-sep">Pr\u00f3ximos</div>`;html+=upcoming.map(eventCardHtml).join('');}
+  if(past.length){html+=`<div class="list-sep">Pasados</div>`;html+=past.map(eventCardHtml).join('');}
+  el.innerHTML=html;
+}
+
+function eventCardHtml(e){ return `
+    <div class="banner-card">
+      <div class="banner-img h160 ${e.imagePos||'top'}">
+        <img src="${e.image||''}" alt="${e.name}" onerror="this.style.opacity='.1'">
+        <div class="b-overlay"></div>
+        <div class="b-content">
+          <div class="b-tag ${e.type.toLowerCase()}">${e.type}</div>
+          <div class="b-title">${e.name}</div>
+          <div class="b-sub">\uD83D\uDCC5 ${fmtDate(e.date)}${e.time?' \u00b7 '+e.time:''} \u00b7 \uD83D\uDCCD ${e.place}</div>
+        </div>
+      </div>
+      <div class="b-body">
+        ${e.tripId?`<span class="trip-link-badge">\u2708\uFE0F ${getTripName(e.tripId)}</span>`:''}
+        <div class="b-actions">
+          ${e.map?`<a href="${e.map}" target="_blank" class="b-btn purple">\uD83D\uDCCD Ver en mapa</a>`:''}
+          ${e.doc?`<a href="${e.doc}" target="_blank" class="b-btn primary">\uD83C\uDFAB Mi entrada</a>`:`<span class="b-btn disabled">Sin entrada</span>`}
+        </div>
+        ${e.notes?`<div style="font-size:12px;color:var(--text2);margin-top:10px;line-height:1.5">${escHtml(e.notes)}</div>`:''}
+        <div class="b-footer">
+          <button class="b-edit-btn" onclick="editEvent('${e.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+          <button class="b-share-btn" onclick="openShareModal('event','${e.id}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
+        </div>
+      </div>
+    </div>`; }
+
+function renderReservations() {
+  const el = document.getElementById('res-list');
+  document.getElementById('res-count').textContent = `${DB.reservations.length} reserva${DB.reservations.length!==1?'s':''}`;
+  if (!DB.reservations.length) { el.innerHTML=`<div class="empty"><span>\uD83C\uDFE8</span><p>Sin reservas a\u00fan.</p></div>`; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sorted = [...DB.reservations].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming = sorted.filter(r=>new Date(r.date)>=today);
+  const past = sorted.filter(r=>new Date(r.date)<today).reverse();
+  let html='';
+  if(upcoming.length){html+=`<div class="list-sep">Pr\u00f3ximas</div>`;html+=upcoming.map(resCardHtml).join('');}
+  if(past.length){html+=`<div class="list-sep">Pasadas</div>`;html+=past.map(resCardHtml).join('');}
+  el.innerHTML=html;
+}
+
+function resCardHtml(r){ return `
+    <div class="banner-card">
+      <div class="banner-img h140 ${r.imagePos||'center'}">
+        <img src="${r.image||''}" alt="${r.name}" onerror="this.style.opacity='.1'">
+        <div class="b-overlay"></div>
+        <div class="b-content">
+          <div class="b-tag ${r.type.toLowerCase()}">${r.type}</div>
+          <div class="b-title">${r.name}</div>
+          <div class="b-sub">\uD83D\uDCC5 ${fmtDate(r.date)}${r.time?' \u00b7 '+r.time:''}${r.people?' \u00b7 '+r.people+' pers.':''}</div>
+        </div>
+      </div>
+      <div class="b-body">
+        ${r.tripId?`<span class="trip-link-badge">\u2708\uFE0F ${getTripName(r.tripId)}</span>`:''}
+        ${r.locator?`<div style="font-size:12px;color:var(--text2);margin-bottom:10px">\uD83D\uDD16 Ref: <strong>${r.locator}</strong></div>`:''}
+        <div class="b-actions">
+          ${r.map?`<a href="${r.map}" target="_blank" class="b-btn teal">\uD83D\uDCCD C\u00f3mo llegar</a>`:''}
+          ${r.doc?`<a href="${r.doc}" target="_blank" class="b-btn blue">\uD83D\uDCC4 Documento</a>`:`<span class="b-btn disabled">Sin doc</span>`}
+          ${r.phone?`<a href="tel:${r.phone.replace(/\s/g,'')}" class="b-btn call">\uD83D\uDCDE Llamar</a>`:''}
+        </div>
+        ${r.raw?`<button class="raw-toggle" onclick="toggleRaw(this)">\uD83D\uDCCB Ver confirmaci\u00f3n</button><div class="raw-body">${escHtml(r.raw)}</div>`:''}
+        <div class="b-footer">
+          <button class="b-edit-btn" onclick="editReservation('${r.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+          <button class="b-share-btn" onclick="openShareModal('res','${r.id}')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
+        </div>
+      </div>
+    </div>`; }
+
+function toggleRaw(btn) {
+  const raw = btn.nextElementSibling;
+  raw.classList.toggle('open');
+  btn.textContent = raw.classList.contains('open')?'\uD83D\uDCCB Ocultar confirmaci\u00f3n':'\uD83D\uDCCB Ver confirmaci\u00f3n';
+}
+
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+function renderCalendar() {
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-month-label').textContent = months[calMonth]+' '+calYear;
+  const grid = document.getElementById('cal-grid');
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const startOffset = first===0?6:first-1;
+  const days = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tripDays = new Set();
+  DB.trips.forEach(t=>{
+    const s = new Date(t.startDate), e = new Date(t.endDate||t.startDate);
+    for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1))
+      if(d.getFullYear()===calYear&&d.getMonth()===calMonth) tripDays.add(d.getDate());
+  });
+  const eventDays = new Set(DB.events.filter(e=>{const d=new Date(e.date);return d.getFullYear()===calYear&&d.getMonth()===calMonth}).map(e=>new Date(e.date).getDate()));
+  const resDays = new Set(DB.reservations.filter(r=>{const d=new Date(r.date);return d.getFullYear()===calYear&&d.getMonth()===calMonth}).map(r=>new Date(r.date).getDate()));
+  let html = '';
+  for(let i=0;i<startOffset;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++) {
+    const isToday = new Date(calYear,calMonth,d).getTime()===today.getTime();
+    let cls = 'cal-day';
+    if(isToday) cls+=' today';
+    if(tripDays.has(d)) cls+=' has-trip';
+    if(eventDays.has(d)) cls+=' has-event';
+    if(resDays.has(d)) cls+=' has-reservation';
+    html+=`<div class="${cls}" onclick="showCalDay(${d})">${d}</div>`;
+  }
+  grid.innerHTML = html;
+  document.getElementById('cal-day-detail').classList.remove('show');
+}
+
+function calNav(dir) { calMonth+=dir; if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function showCalDay(day) {
+  const items = [
+    ...DB.events.filter(e=>{const d=new Date(e.date);return d.getFullYear()===calYear&&d.getMonth()===calMonth&&d.getDate()===day}).map(e=>({name:e.name,type:e.type,time:e.time||'',color:'var(--purple)'})),
+    ...DB.reservations.filter(r=>{const d=new Date(r.date);return d.getFullYear()===calYear&&d.getMonth()===calMonth&&d.getDate()===day}).map(r=>({name:r.name,type:r.type,time:r.time||'',color:'var(--amber)'})),
+    ...DB.trips.filter(t=>{const s=new Date(t.startDate),e=new Date(t.endDate||t.startDate),dt=new Date(calYear,calMonth,day);return dt>=s&&dt<=e}).map(t=>({name:t.name,type:'Viaje',time:'',color:'var(--teal)'}))
+  ].sort((a,b)=>a.time.localeCompare(b.time));
+  const det = document.getElementById('cal-day-detail');
+  if(!items.length){det.classList.remove('show');return;}
+  det.innerHTML=`<div class="cal-ev-title">${day} de ${['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][calMonth]}</div>`+
+    items.map(i=>`<div class="cal-ev-item">
+      <div class="cal-ev-dot" style="background:${i.color}"></div>
+      <span style="flex:1;font-size:13px;font-weight:500">${i.name}</span>
+      ${i.time?`<span class="cal-ev-time">${i.time}</span>`:''}
+      <span class="cal-ev-badge" style="background:${i.color}22;color:${i.color}">${i.type}</span>
+    </div>`).join('');
+  det.classList.add('show');
+}
+
+function openSheet(type) {
+  if(type==='trip') {
+    editingTripId = null;
+    document.getElementById('trip-sheet-title').textContent='Nuevo viaje';
+    ['trip-name','trip-dest','trip-cover','trip-drive','trip-budget','trip-weather-city'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('trip-start').value=''; document.getElementById('trip-end').value='';
+    document.getElementById('trip-cover-preview').classList.remove('show');
+    document.getElementById('trip-pos-row').style.display='none';
+    document.getElementById('trip-delete-btn').style.display='none';
+  }
+  if(type==='event') {
+    editingEventId = null;
+    document.getElementById('event-sheet-title').textContent='Nuevo evento';
+    ['event-name','event-date','event-time','event-place','event-map','event-doc','event-img-url','event-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('event-cover-preview').classList.remove('show');
+    document.getElementById('event-pos-row').style.display='none';
+    document.getElementById('event-delete-btn').style.display='none';
+    selectType('event','Concierto');
+    buildTripSel('event-trip-sel','');
+  }
+  if(type==='reservation') {
+    editingResId = null;
+    document.getElementById('res-sheet-title').textContent='Nueva reserva';
+    ['res-name','res-date','res-time','res-people','res-locator','res-map','res-doc','res-img-url','res-raw'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('res-cover-preview').classList.remove('show');
+    document.getElementById('res-pos-row').style.display='none';
+    document.getElementById('res-delete-btn').style.display='none';
+    selectType('res','Hotel');
+    buildTripSel('res-trip-sel','');
+  }
+  document.getElementById('overlay-'+type).classList.add('open');
+}
+
+function closeSheet(type) { document.getElementById('overlay-'+type).classList.remove('open'); }
+function closeSheetOnBg(e,type) { if(e.target===document.getElementById('overlay-'+type)) closeSheet(type); }
+
+function openNoteSheet(noteId) {
+  editingNoteId = noteId||null;
+  document.getElementById('note-sheet-title').textContent = noteId?'Editar nota':'Nueva nota';
+  if(noteId) {
+    const trip = DB.trips.find(t=>t.id===currentTripId);
+    const note = trip?.notes?.find(n=>n.id===noteId);
+    if(note){ document.getElementById('note-title').value=note.title; document.getElementById('note-body').value=note.body; }
+    document.getElementById('note-delete-btn').style.display='block';
+  } else {
+    document.getElementById('note-title').value=''; document.getElementById('note-body').value='';
+    document.getElementById('note-delete-btn').style.display='none';
+  }
+  document.getElementById('overlay-note').classList.add('open');
+}
+
+function saveNote() {
+  const title = document.getElementById('note-title').value.trim();
+  const body = document.getElementById('note-body').value.trim();
+  if(!title){ alert('A\u00f1ade un t\u00edtulo'); return; }
+  const trip = DB.trips.find(t=>t.id===currentTripId);
+  if(!trip) return;
+  if(!trip.notes) trip.notes=[];
+  if(editingNoteId) { const note = trip.notes.find(n=>n.id===editingNoteId); if(note){ note.title=title; note.body=body; } }
+  else trip.notes.push({id:uid(),title,body});
+  save(); closeSheet('note'); renderNotes(trip);
+}
+
+function deleteNote() {
+  if(!confirm('\u00bfEliminar esta nota?')) return;
+  const trip = DB.trips.find(t=>t.id===currentTripId);
+  if(!trip) return;
+  trip.notes = trip.notes.filter(n=>n.id!==editingNoteId);
+  save(); closeSheet('note'); renderNotes(trip);
+}
+
+function saveTrip() {
+  const name=document.getElementById('trip-name').value.trim();
+  const dest=document.getElementById('trip-dest').value.trim();
+  if(!name||!dest){alert('Nombre y destino son obligatorios');return;}
+  const wc=document.getElementById('trip-weather-city').value.trim();
+  const data={name,dest,startDate:document.getElementById('trip-start').value,endDate:document.getElementById('trip-end').value,cover:document.getElementById('trip-cover').value.trim(),coverPos:currentTripPos||'center',drive:document.getElementById('trip-drive').value.trim(),budget:document.getElementById('trip-budget').value.trim(),weatherCity:wc||dest};
+  if(editingTripId){const t=DB.trips.find(t=>t.id===editingTripId);if(t)Object.assign(t,data);}
+  else DB.trips.push({id:uid(),...data,notes:[]});
+  save(); closeSheet('trip'); renderTrips(); renderHome();
+}
+
+function editTrip(id) {
+  const t=DB.trips.find(t=>t.id===id); if(!t) return;
+  editingTripId=id;
+  document.getElementById('trip-sheet-title').textContent='Editar viaje';
+  document.getElementById('trip-name').value=t.name; document.getElementById('trip-dest').value=t.dest;
+  document.getElementById('trip-start').value=t.startDate; document.getElementById('trip-end').value=t.endDate||'';
+  document.getElementById('trip-cover').value=t.cover||''; document.getElementById('trip-drive').value=t.drive||''; document.getElementById('trip-budget').value=t.budget||'';
+  document.getElementById('trip-weather-city').value=t.weatherCity||'';
+  if(t.cover){document.getElementById('trip-cover-img').src=t.cover;document.getElementById('trip-cover-preview').classList.add('show');document.getElementById('trip-pos-row').style.display='flex';}
+  currentTripPos=t.coverPos||'center'; setPosTrip(currentTripPos);
+  document.getElementById('trip-delete-btn').style.display='block';
+  document.getElementById('overlay-trip').classList.add('open');
+}
+
+function editCurrentTrip() { editTrip(currentTripId); }
+
+function deleteTrip() {
+  if(!confirm('\u00bfEliminar este viaje y todas sus notas?')) return;
+  DB.trips=DB.trips.filter(t=>t.id!==editingTripId);
+  save(); closeSheet('trip'); backFromDetail(); renderTrips(); renderHome();
+}
+
+let currentEventType='Concierto';
+function saveEvent() {
+  const name=document.getElementById('event-name').value.trim();
+  if(!name){alert('Nombre obligatorio');return;}
+  const data={type:currentEventType,name,date:document.getElementById('event-date').value,time:document.getElementById('event-time').value,place:document.getElementById('event-place').value.trim(),tripId:getSelTrip('event-trip-sel'),map:document.getElementById('event-map').value.trim(),doc:document.getElementById('event-doc').value.trim(),image:document.getElementById('event-img-url').value.trim(),imagePos:currentEventPos||'top',notes:document.getElementById('event-notes').value.trim()};
+  if(editingEventId){const e=DB.events.find(e=>e.id===editingEventId);if(e)Object.assign(e,data);}
+  else DB.events.push({id:uid(),...data});
+  save(); closeSheet('event'); renderEvents(); renderHome();
+}
+
+function editEvent(id) {
+  const e=DB.events.find(e=>e.id===id); if(!e) return;
+  editingEventId=id;
+  document.getElementById('event-sheet-title').textContent='Editar evento';
+  currentEventType=e.type; selectType('event',e.type);
+  document.getElementById('event-name').value=e.name; document.getElementById('event-date').value=e.date; document.getElementById('event-time').value=e.time||'';
+  document.getElementById('event-place').value=e.place; document.getElementById('event-map').value=e.map||''; document.getElementById('event-doc').value=e.doc||'';
+  document.getElementById('event-img-url').value=e.image||''; document.getElementById('event-notes').value=e.notes||'';
+  if(e.image){document.getElementById('event-cover-img').src=e.image;document.getElementById('event-cover-preview').classList.add('show');document.getElementById('event-pos-row').style.display='flex';}
+  currentEventPos=e.imagePos||'top'; setPosEvent(currentEventPos);
+  document.getElementById('event-delete-btn').style.display='block';
+  buildTripSel('event-trip-sel', e.tripId||'');
+  document.getElementById('overlay-event').classList.add('open');
+}
+
+function deleteEvent() {
+  if(!confirm('\u00bfEliminar este evento?')) return;
+  DB.events=DB.events.filter(e=>e.id!==editingEventId);
+  save(); closeSheet('event'); renderEvents(); renderHome();
+}
+
+let currentResType='Hotel';
+function saveReservation() {
+  const name=document.getElementById('res-name').value.trim();
+  if(!name){alert('Nombre obligatorio');return;}
+  const data={type:currentResType,name,date:document.getElementById('res-date').value,time:document.getElementById('res-time').value,people:document.getElementById('res-people').value,locator:document.getElementById('res-locator').value.trim(),phone:document.getElementById('res-phone').value.trim(),tripId:getSelTrip('res-trip-sel'),map:document.getElementById('res-map').value.trim(),doc:document.getElementById('res-doc').value.trim(),image:document.getElementById('res-img-url').value.trim(),imagePos:currentResPos||'center',raw:document.getElementById('res-raw').value.trim()};
+  if(editingResId){const r=DB.reservations.find(r=>r.id===editingResId);if(r)Object.assign(r,data);}
+  else DB.reservations.push({id:uid(),...data});
+  save(); closeSheet('reservation'); renderReservations(); renderHome();
+}
+
+function editReservation(id) {
+  const r=DB.reservations.find(r=>r.id===id); if(!r) return;
+  editingResId=id;
+  document.getElementById('res-sheet-title').textContent='Editar reserva';
+  currentResType=r.type; selectType('res',r.type);
+  document.getElementById('res-name').value=r.name; document.getElementById('res-date').value=r.date; document.getElementById('res-time').value=r.time||'';
+  document.getElementById('res-people').value=r.people||''; document.getElementById('res-locator').value=r.locator||''; document.getElementById('res-phone').value=r.phone||'';
+  document.getElementById('res-map').value=r.map||''; document.getElementById('res-doc').value=r.doc||'';
+  document.getElementById('res-img-url').value=r.image||''; document.getElementById('res-raw').value=r.raw||'';
+  if(r.image){document.getElementById('res-cover-img').src=r.image;document.getElementById('res-cover-preview').classList.add('show');document.getElementById('res-pos-row').style.display='flex';}
+  currentResPos=r.imagePos||'center'; setPosRes(currentResPos);
+  document.getElementById('res-delete-btn').style.display='block';
+  buildTripSel('res-trip-sel', r.tripId||'');
+  document.getElementById('overlay-reservation').classList.add('open');
+}
+
+function deleteReservation() {
+  if(!confirm('\u00bfEliminar esta reserva?')) return;
+  DB.reservations=DB.reservations.filter(r=>r.id!==editingResId);
+  save(); closeSheet('reservation'); renderReservations(); renderHome();
+}
+
+let currentTripPos='center', currentEventPos='top', currentResPos='center';
+
+function previewImg(type) {
+  const url = document.getElementById(type==='trip'?'trip-cover':type==='event'?'event-img-url':'res-img-url').value.trim();
+  const previewId = type==='trip'?'trip-cover-preview':type==='event'?'event-cover-preview':'res-cover-preview';
+  const imgId = type==='trip'?'trip-cover-img':type==='event'?'event-cover-img':'res-cover-img';
+  const rowId = type==='trip'?'trip-pos-row':type==='event'?'event-pos-row':'res-pos-row';
+  if(url){document.getElementById(imgId).src=url;document.getElementById(previewId).classList.add('show');document.getElementById(rowId).style.display='flex';}
+  else{document.getElementById(previewId).classList.remove('show');document.getElementById(rowId).style.display='none';}
+}
+
+function setPosTrip(pos){currentTripPos=pos;updatePosBtns('trip-pos-row',pos);if(document.getElementById('trip-cover-img'))document.getElementById('trip-cover-img').style.objectPosition=pos==='top'?'top center':pos==='bottom'?'bottom center':'center';}
+function setPosEvent(pos){currentEventPos=pos;updatePosBtns('event-pos-row',pos);if(document.getElementById('event-cover-img'))document.getElementById('event-cover-img').style.objectPosition=pos==='top'?'top center':pos==='bottom'?'bottom center':'center';}
+function setPosRes(pos){currentResPos=pos;updatePosBtns('res-pos-row',pos);if(document.getElementById('res-cover-img'))document.getElementById('res-cover-img').style.objectPosition=pos==='top'?'top center':pos==='bottom'?'bottom center':'center';}
+
+function updatePosBtns(rowId, activePos) {
+  const row = document.getElementById(rowId); if(!row) return;
+  row.querySelectorAll('.img-pos-btn').forEach(btn=>{
+    const pos = btn.textContent.includes('Arriba')?'top':btn.textContent.includes('Abajo')?'bottom':'center';
+    btn.classList.toggle('active', pos===activePos);
+  });
+}
+
+function selectType(form, type) {
+  if(form==='event') currentEventType=type;
+  if(form==='res') currentResType=type;
+  const gridId = form==='event'?'event-type-grid':'res-type-grid';
+  document.getElementById(gridId).querySelectorAll('.type-opt').forEach(o=>o.classList.toggle('active',o.textContent.includes(type)));
+}
+
+function buildShareUrl(data) {
+  try {
+    const base = window.location.href.split('?')[0];
+    return base + '?share=' + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  } catch(e) { return window.location.href; }
+}
+
+function openShareModal(type, id) {
+  let title='Compartir', text='', shareData=null;
+  if(type==='trip'){
+    const tid=id||currentTripId;const t=DB.trips.find(t=>t.id===tid);if(!t)return;
+    title=`Compartir \u2014 ${t.name}`;
+    const lev=DB.events.filter(e=>e.tripId===tid);
+    const lre=DB.reservations.filter(r=>r.tripId===tid);
+    shareData={trips:[t],events:lev,reservations:lre};
+    text=`\u2708\uFE0F ${t.name}\n\uD83D\uDCCD ${t.dest}\n\uD83D\uDCC5 ${fmtDateRange(t.startDate,t.endDate)}`;
+  } else if(type==='event'){
+    const e=DB.events.find(e=>e.id===id);if(!e)return;
+    title=`Compartir \u2014 ${e.name}`;
+    shareData={trips:[],events:[e],reservations:[]};
+    text=`\uD83C\uDFAB ${e.name}\n\uD83D\uDCC5 ${fmtDate(e.date)}\n\uD83D\uDCCD ${e.place}`;
+  } else if(type==='res'){
+    const r=DB.reservations.find(r=>r.id===id);if(!r)return;
+    title=`Compartir \u2014 ${r.name}`;
+    shareData={trips:[],events:[],reservations:[r]};
+    text=`\uD83C\uDFE8 ${r.name}\n\uD83D\uDCC5 ${fmtDate(r.date)}${r.time?' \u00b7 '+r.time:''}`;
+  }
+  const shareUrl = shareData ? buildShareUrl(shareData) : window.location.href;
+  const fullText = text + '\n\n' + shareUrl;
+  document.getElementById('share-title').textContent=title;
+  const enc=encodeURIComponent(fullText);
+  const urlEnc=encodeURIComponent(shareUrl);
+  document.getElementById('share-body').innerHTML=`
+    <div class="share-opt" onclick="nativeShare('${enc}','${urlEnc}')"><div class="share-ic" style="background:#E6F1FB">\uD83D\uDCE4</div><div class="share-text"><h3>Compartir con...</h3><p>WhatsApp, Telegram, Mail, etc. · Incluye enlace de importaci\u00f3n</p></div></div>
+    <div class="share-opt" onclick="copyShareUrl('${urlEnc}')"><div class="share-ic" style="background:#EAF3DE">\uD83D\uDD17</div><div class="share-text"><h3>Copiar enlace de importaci\u00f3n</h3><p>Quien lo abre puede importar los datos directamente</p></div></div>
+    <div class="share-opt" onclick="exportJSON('${type}','${id||currentTripId}')"><div class="share-ic" style="background:#FAEEDA">\uD83D\uDCC2</div><div class="share-text"><h3>Exportar datos (JSON)</h3><p>Para importar manualmente en otro dispositivo</p></div></div>
+    <div class="share-opt" onclick="openSheet('import');closeSheet('share')"><div class="share-ic" style="background:#EEEDFE">\uD83D\uDCE5</div><div class="share-text"><h3>Importar datos</h3><p>Pega un JSON exportado</p></div></div>`;
+  document.getElementById('overlay-share').classList.add('open');
+}
+
+function nativeShare(enc,urlEnc){
+  const text=decodeURIComponent(enc);
+  const url=urlEnc?decodeURIComponent(urlEnc):window.location.href;
+  if(navigator.share){navigator.share({title:'Viajes & Plans',text,url});}
+  else{copyShareUrl(urlEnc||encodeURIComponent(window.location.href));}
+  closeSheet('share');
+}
+function copyShareUrl(urlEnc){
+  const url=decodeURIComponent(urlEnc);
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>alert('\u00a1Enlace copiado! \uD83D\uDD17\nCuando lo abran podr\u00e1n importar los datos directamente.'));}
+  else{alert('Enlace: '+url);}
+  closeSheet('share');
+}
+function copyUrl(){copyShareUrl(encodeURIComponent(window.location.href));}
+
+function exportJSON(type, id) {
+  let data, filename;
+  if(type==='trip'){const t=DB.trips.find(t=>t.id===id);const lev=DB.events.filter(e=>e.tripId===id);const lre=DB.reservations.filter(r=>r.tripId===id);data={trips:[t],events:lev,reservations:lre};filename=t.name.replace(/\s/g,'-')+'.json';}
+  else{data=DB;filename='viajes-plans-backup.json';}
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+  closeSheet('share');
+}
+
+function importData() {
+  try {
+    const raw=document.getElementById('import-json').value.trim();
+    const d=JSON.parse(raw);
+    if(!d.trips&&!d.events&&!d.reservations) throw new Error('formato incorrecto');
+    const mode=document.querySelector('input[name="import-mode"]:checked')?.value||'replace';
+    if(mode==='replace'){if(d.trips)DB.trips=d.trips;if(d.events)DB.events=d.events;if(d.reservations)DB.reservations=d.reservations;}
+    else{
+      if(d.trips)d.trips.forEach(t=>{const idx=DB.trips.findIndex(x=>x.id===t.id);if(idx>=0)DB.trips[idx]=t;else DB.trips.push(t);});
+      if(d.events)d.events.forEach(e=>{const idx=DB.events.findIndex(x=>x.id===e.id);if(idx>=0)DB.events[idx]=e;else DB.events.push(e);});
+      if(d.reservations)d.reservations.forEach(r=>{const idx=DB.reservations.findIndex(x=>x.id===r.id);if(idx>=0)DB.reservations[idx]=r;else DB.reservations.push(r);});
+    }
+    save();closeSheet('import');renderHome();
+    alert('\u2705 Importado correctamente\n\n'+(d.trips||[]).length+' viajes \u00b7 '+(d.events||[]).length+' eventos \u00b7 '+(d.reservations||[]).length+' reservas');
+  } catch(e){alert('\u274C Error al importar.\nRevisa que el JSON sea v\u00e1lido.\n\n'+e.message);}
+}
+
+async function fetchWeather(city,elId){
+  if(!city||!elId)return;const el=document.getElementById(elId);if(!el)return;
+  if(weatherCache[city]){el.textContent=weatherCache[city];return;}
+  try{
+    const geoR=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city.split(',')[0].trim())}&count=1&language=es&format=json`);
+    const geoD=await geoR.json();if(!geoD.results||!geoD.results.length)throw new Error('no geo');
+    const{latitude:lat,longitude:lon}=geoD.results[0];
+    const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const wD=await wR.json();const temp=Math.round(wD.current_weather.temperature);
+    const result=`${weatherIcon(wD.current_weather.weathercode)} ${temp}\u00b0C`;
+    weatherCache[city]=result;if(document.getElementById(elId))document.getElementById(elId).textContent=result;
+  }catch(e){if(document.getElementById(elId))document.getElementById(elId).textContent='\uD83C\uDF24\uFE0F';}
+}
+
+async function fetchWeekWeather(city,elId){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML='<div class="weather-loading">\uD83C\uDF24\uFE0F Cargando previsi\u00f3n...</div>';
+  try{
+    const geoR=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city.split(',')[0].trim())}&count=1&language=es&format=json`);
+    const geoD=await geoR.json();if(!geoD.results||!geoD.results.length)throw new Error('no geo');
+    const{latitude:lat,longitude:lon}=geoD.results[0];
+    const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&forecast_days=7`);
+    const wD=await wR.json();const days=wD.daily;const today=new Date().toISOString().split('T')[0];
+    const dayNames=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
+    let html='<div class="weather-week">';
+    for(let i=0;i<days.time.length;i++){
+      const d=new Date(days.time[i]+'T00:00:00');const isToday=days.time[i]===today;const name=isToday?'Hoy':dayNames[d.getDay()];
+      html+=`<div class="weather-day${isToday?' today':''}"><div class="weather-day-name">${name}</div><div class="weather-day-icon">${weatherIcon(days.weathercode[i])}</div><div class="weather-day-temp">${Math.round(days.temperature_2m_max[i])}\u00b0</div><div class="weather-day-minmax">${Math.round(days.temperature_2m_min[i])}\u00b0</div></div>`;
+    }
+    html+='</div>';el.innerHTML=html;
+  }catch(e){el.innerHTML='';}
+}
+
+function weatherIcon(code){
+  if(code===0)return'☀️';
+  if(code===1)return'🌤️';
+  if(code===2)return'⛅';
+  if(code===3)return'☁️';
+  if(code<=48)return'🌫️';
+  if(code<=57)return'🌦️';
+  if(code<=67)return'🌧️';
+  if(code<=77)return'❄️';
+  if(code<=82)return'🌧️';
+  if(code<=86)return'🌨️';
+  if(code<=99)return'⛈️';
+  return'⛅';
+}
+
+function fmtDate(dateStr){if(!dateStr)return'';const d=new Date(dateStr+'T00:00:00');return d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDateRange(s,e){if(!s)return'';if(!e||s===e)return fmtDate(s);const sd=new Date(s+'T00:00:00'),ed=new Date(e+'T00:00:00');const sm=sd.toLocaleDateString('es-ES',{month:'short'}),em=ed.toLocaleDateString('es-ES',{month:'short',year:'numeric'});if(sd.getMonth()===ed.getMonth()&&sd.getFullYear()===ed.getFullYear())return`${sd.getDate()}\u2013${ed.getDate()} ${sm} ${sd.getFullYear()}`;return`${sd.getDate()} ${sm} \u2013 ${ed.getDate()} ${em}`;}
+function escHtml(t){return t?t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+function linkify(t){return t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>')}
+
+// ════════════════════════════════
+// TRIP SELECTOR HELPERS
+// ════════════════════════════════
+function buildTripSel(containerId, selectedId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.dataset.sel = selectedId||'';
+  let html = `<div class="trip-sel-opt ${!selectedId?'active':''}" onclick="setSelTrip('${containerId}','')">Sin viaje</div>`;
+  DB.trips.forEach(t=>{
+    html+=`<div class="trip-sel-opt ${selectedId===t.id?'active':''}" onclick="setSelTrip('${containerId}','${t.id}')">${t.name}</div>`;
+  });
+  el.innerHTML=html;
+}
+
+function setSelTrip(containerId, tripId) {
+  const el=document.getElementById(containerId); if(!el)return;
+  el.dataset.sel=tripId;
+  el.querySelectorAll('.trip-sel-opt').forEach(o=>o.classList.remove('active'));
+  const opts=el.querySelectorAll('.trip-sel-opt');
+  if(!tripId){opts[0]&&opts[0].classList.add('active');}
+  else{opts.forEach(o=>{if(o.textContent===DB.trips.find(t=>t.id===tripId)?.name)o.classList.add('active');});}
+  buildTripSel(containerId,tripId);
+}
+
+function getSelTrip(containerId) {
+  return document.getElementById(containerId)?.dataset?.sel||'';
+}
+
+// ════════════════════════════════
+// LINKED ITEMS IN TRIP DETAIL
+// ════════════════════════════════
+function renderLinkedItems(tripId) {
+  const el=document.getElementById('det-linked'); if(!el)return;
+  const evs=DB.events.filter(e=>e.tripId===tripId).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const res=DB.reservations.filter(r=>r.tripId===tripId).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!evs.length&&!res.length){el.innerHTML='';return;}
+  let html='';
+  if(res.length){
+    html+=`<div class="list-sep" style="padding-top:8px">Reservas vinculadas</div>`;
+    res.forEach(r=>{
+      const colors={Hotel:'var(--teal)',Restaurante:'var(--amber)',Apartamento:'var(--blue)',Transporte:'var(--coral)'};
+      html+=`<div class="linked-item">
+        <div class="linked-dot" style="background:${colors[r.type]||'var(--amber)'}"></div>
+        <div class="linked-body"><h4>${r.name}</h4><p>${fmtDate(r.date)}${r.time?' · '+r.time:''}${r.people?' · '+r.people+' pers.':''}</p></div>
+        <span class="linked-tag" style="background:var(--amber-l);color:var(--amber-d)">${r.type}</span>
+      </div>`;
+    });
+  }
+  if(evs.length){
+    html+=`<div class="list-sep" style="padding-top:${res.length?'4':'8'}px">Eventos vinculados</div>`;
+    evs.forEach(e=>{
+      html+=`<div class="linked-item">
+        <div class="linked-dot" style="background:var(--purple)"></div>
+        <div class="linked-body"><h4>${e.name}</h4><p>${fmtDate(e.date)}${e.time?' · '+e.time:''} · ${e.place||''}</p></div>
+        <span class="linked-tag" style="background:var(--purple-l);color:var(--purple-d)">${e.type}</span>
+      </div>`;
+    });
+  }
+  el.innerHTML=html;
+}
+
+function renderFlights(){}
+
+// INIT
+seedIfEmpty();
+checkUrlShare();
+renderHome();
+
+function checkUrlShare() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const shareParam = params.get('share');
+    if (!shareParam) return;
+    const data = JSON.parse(decodeURIComponent(escape(atob(shareParam))));
+    // Clean URL without reload
+    window.history.replaceState({}, '', window.location.pathname);
+    // Show import preview
+    const trips = data.trips||[], evs = data.events||[], res = data.reservations||[];
+    const preview = [
+      trips.length ? trips.map(t=>t.name).join(', ') : '',
+      evs.length ? evs.length+' evento'+(evs.length>1?'s':'') : '',
+      res.length ? res.length+' reserva'+(res.length>1?'s':'') : ''
+    ].filter(Boolean).join(' · ');
+    document.getElementById('import-json').value = JSON.stringify(data, null, 2);
+    // Show a nice banner before opening sheet
+    setTimeout(()=>{
+      if(confirm('\u2708\uFE0F Datos recibidos\n\n'+preview+'\n\n\u00bfImportar ahora?')) {
+        importData();
+      } else {
+        document.getElementById('overlay-import').classList.add('open');
+      }
+    }, 400);
+  } catch(e) { console.warn('Error procesando share:', e); }
+}
+</script>
+</body>
+</html>
